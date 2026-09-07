@@ -1,0 +1,468 @@
+@import "tailwindcss";
+
+/* =====================================================================
+   Resonate — dark streaming theme
+
+   Dark only. Hierarchy comes from background steps and spacing, never
+   from borders. The warm gradient is reserved for brand marks, primary
+   CTAs and active states.
+
+   The variable *names* are unchanged from the previous theme so every
+   existing component re-skins without edits; only the values moved.
+   ===================================================================== */
+
+:root {
+  /* --- surfaces: hierarchy by elevation, not by lines --- */
+  --bg: #0a0a0a;
+  --surface: #121212;
+  --surface-2: #1a1a1a;
+  --surface-3: #1e1e1e;
+  --surface-4: #242424;
+  --player-bg: #181818;
+
+  /* Borders exist only where a hairline genuinely helps. */
+  --border: #202020;
+  --border-soft: #171717;
+
+  /* --- type --- */
+  --text: #ffffff;
+  --text-dim: #a0a0a0;
+  --text-mute: #6a6a6a;
+  --text-faint: #3a3a3a;
+
+  /* --- accent: warm orange → amber --- */
+  --accent-from: #ffbe00;
+  --accent-to: #e85e0a;
+  --accent: #f5820a;
+  --accent-2: #ffbe00;
+  --accent-soft: rgba(232, 94, 10, 0.14);
+  --accent-ring: rgba(232, 94, 10, 0.45);
+  --on-accent: #0a0a0a;
+
+  --danger: #ff4d4f;
+  --success: #22c55e;
+
+  /* --- radii --- */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-full: 999px;
+
+  /* --- shadows: floating elements only --- */
+  --shadow-lg: 0 4px 24px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.3);
+
+  /* --- metrics --- */
+  --nav-h: 4rem;
+  --mini-h: 5.25rem;
+  --header-h: 4rem;
+  --sidebar-w: 15rem;
+  --sidebar-w-collapsed: 4.5rem;
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+
+  color-scheme: dark;
+}
+
+/* Accent variants (Settings → Appearance). Each is a from/to pair so the
+   gradient stays a gradient whichever is chosen. */
+:root[data-accent="ember"] {
+  --accent-from: #ffbe00;
+  --accent-to: #e85e0a;
+  --accent: #f5820a;
+  --accent-2: #ffbe00;
+  --accent-soft: rgba(232, 94, 10, 0.14);
+  --accent-ring: rgba(232, 94, 10, 0.45);
+  --on-accent: #0a0a0a;
+}
+:root[data-accent="violet"] {
+  --accent-from: #a78bfa;
+  --accent-to: #7c3aed;
+  --accent: #8b5cf6;
+  --accent-2: #a78bfa;
+  --accent-soft: rgba(139, 92, 246, 0.16);
+  --accent-ring: rgba(139, 92, 246, 0.45);
+  --on-accent: #ffffff;
+}
+:root[data-accent="cyan"] {
+  --accent-from: #67e8f9;
+  --accent-to: #0891b2;
+  --accent: #22d3ee;
+  --accent-2: #67e8f9;
+  --accent-soft: rgba(34, 211, 238, 0.14);
+  --accent-ring: rgba(34, 211, 238, 0.45);
+  --on-accent: #04222a;
+}
+:root[data-accent="rose"] {
+  --accent-from: #fda4af;
+  --accent-to: #e11d48;
+  --accent: #fb7185;
+  --accent-2: #fda4af;
+  --accent-soft: rgba(251, 113, 133, 0.14);
+  --accent-ring: rgba(251, 113, 133, 0.45);
+  --on-accent: #2c0510;
+}
+:root[data-accent="lime"] {
+  --accent-from: #d9f99d;
+  --accent-to: #65a30d;
+  --accent: #a3e635;
+  --accent-2: #d9f99d;
+  --accent-soft: rgba(163, 230, 53, 0.14);
+  --accent-ring: rgba(163, 230, 53, 0.45);
+  --on-accent: #16210a;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior-y: none;
+  letter-spacing: -0.011em;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* ---------------------------------------------------------------- *
+   Focus
+ * ---------------------------------------------------------------- */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+/* ---------------------------------------------------------------- *
+   Scrollbars — thin, near-invisible until hovered
+ * ---------------------------------------------------------------- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-4) transparent;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--surface-4);
+  border-radius: var(--r-full);
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #333;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ---------------------------------------------------------------- *
+   Utilities
+ * ---------------------------------------------------------------- */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.brand-gradient {
+  background-image: linear-gradient(135deg, var(--accent-from) 0%, var(--accent-to) 100%);
+}
+
+.brand-text {
+  background-image: linear-gradient(120deg, var(--accent-from) 5%, var(--accent-to) 95%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Small-caps section label, e.g. "BROWSE" / "TRENDING". */
+.eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+}
+
+.section-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--text);
+}
+@media (min-width: 640px) {
+  .section-title {
+    font-size: 1.25rem;
+  }
+}
+
+/* Cards lift very slightly; no borders involved. */
+.card-hover {
+  transition:
+    transform 0.2s var(--ease),
+    opacity 0.2s ease;
+}
+.card-hover:hover {
+  transform: scale(1.03);
+}
+
+.brighten:hover {
+  filter: brightness(1.12);
+}
+
+/* Horizontal carousel with snap and no visible scrollbar. */
+.carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+.carousel::-webkit-scrollbar {
+  display: none;
+}
+.carousel > * {
+  scroll-snap-align: start;
+  flex: 0 0 auto;
+}
+
+/* ---------------------------------------------------------------- *
+   Skeletons — shimmer over a flat dark block
+ * ---------------------------------------------------------------- */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.05),
+    transparent
+  );
+  animation: shimmer 1.6s infinite;
+}
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Blur-up: the tiny placeholder sharpens as the full image arrives. */
+.blurup-placeholder {
+  filter: blur(14px);
+  transform: scale(1.12);
+}
+.blurup-full {
+  transition: opacity 0.45s ease;
+}
+
+/* ---------------------------------------------------------------- *
+   Motion
+ * ---------------------------------------------------------------- */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-rise {
+  animation: rise 0.32s var(--ease) both;
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+.animate-sheet {
+  animation: sheet-in 0.34s var(--ease) both;
+}
+
+@keyframes drawer-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+.animate-drawer {
+  animation: drawer-in 0.28s var(--ease) both;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-fade {
+  animation: fade-in 0.22s ease both;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-toast {
+  animation: toast-in 0.28s var(--ease) both;
+}
+
+@keyframes eq-bar {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+.eq-bar {
+  transform-origin: bottom;
+  animation: eq-bar 0.9s ease-in-out infinite;
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-spin-slow {
+  animation: spin-slow 1.1s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+:root[data-reduce-motion="1"] *,
+:root[data-reduce-motion="1"] *::before,
+:root[data-reduce-motion="1"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* ---------------------------------------------------------------- *
+   Range inputs — thin track, gradient fill
+ * ---------------------------------------------------------------- */
+input[type="range"].track-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  background: transparent;
+  cursor: pointer;
+}
+input[type="range"].track-range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: var(--r-full);
+  background: linear-gradient(
+    to right,
+    var(--accent-to) 0%,
+    var(--accent-from) var(--fill, 0%),
+    var(--surface-4) var(--fill, 0%),
+    var(--surface-4) 100%
+  );
+}
+input[type="range"].track-range::-moz-range-track {
+  height: 4px;
+  border-radius: var(--r-full);
+  background: linear-gradient(
+    to right,
+    var(--accent-to) 0%,
+    var(--accent-from) var(--fill, 0%),
+    var(--surface-4) var(--fill, 0%),
+    var(--surface-4) 100%
+  );
+}
+input[type="range"].track-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  margin-top: -4px;
+  border-radius: var(--r-full);
+  background: var(--text);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+input[type="range"].track-range::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: none;
+  border-radius: var(--r-full);
+  background: var(--text);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+input[type="range"].track-range:hover::-webkit-slider-thumb,
+input[type="range"].track-range:focus-visible::-webkit-slider-thumb {
+  opacity: 1;
+}
+input[type="range"].track-range:hover::-moz-range-thumb,
+input[type="range"].track-range:focus-visible::-moz-range-thumb {
+  opacity: 1;
+}
+input[type="range"].track-range:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+/* ---------------------------------------------------------------- *
+   YouTube player surface
+ * ---------------------------------------------------------------- */
+.yt-stage iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
