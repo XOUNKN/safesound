@@ -32,8 +32,8 @@ function TrackRowBase({
   const isPlaying = useStore((s) => s.isPlaying);
   const isFav = useStore((s) => s.favorites.has(track.videoId));
 
-  const title = cleanTitle(track.title);
-  const artist = cleanArtist(track.channelTitle);
+  const title = cleanTitle(track);
+  const artist = cleanArtist(track);
 
   return (
     <div
@@ -130,7 +130,7 @@ export function TrackCard({
 }) {
   const isCurrent = useStore((s) => currentTrack(s)?.videoId === track.videoId);
   const isPlaying = useStore((s) => s.isPlaying);
-  const title = cleanTitle(track.title);
+  const title = cleanTitle(track);
 
   return (
     <div className="group relative w-[9.5rem] shrink-0 sm:w-[11rem]">
@@ -138,7 +138,7 @@ export function TrackCard({
         type="button"
         onClick={onPlay}
         className="block w-full text-left"
-        aria-label={`Play ${title} by ${cleanArtist(track.channelTitle)}`}
+        aria-label={`Play ${title} by ${cleanArtist(track)}`}
       >
         <span className="card-hover relative block">
           <Artwork
@@ -170,7 +170,7 @@ export function TrackCard({
           {title}
         </span>
         <span className="mt-0.5 block truncate text-[0.75rem] text-[var(--text-dim)]">
-          {caption ?? cleanArtist(track.channelTitle)}
+          {caption ?? cleanArtist(track)}
         </span>
       </button>
       <button

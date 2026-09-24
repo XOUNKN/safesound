@@ -198,8 +198,8 @@ function Meta({ expanded }: { expanded: boolean }) {
   const isFav = useStore((s) => (track ? s.favorites.has(track.videoId) : false));
   if (!track) return null;
 
-  const title = cleanTitle(track.title);
-  const artist = cleanArtist(track.channelTitle);
+  const title = cleanTitle(track);
+  const artist = cleanArtist(track);
 
   if (!expanded) {
     return (

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { api, describeError } from "@/lib/api";
 import { cleanArtist, cleanTitle, pluralize, relativeTime } from "@/lib/format";
 import {
@@ -16,7 +17,7 @@ import { PlaylistCard } from "@/components/PlaylistCard";
 import { Artwork, PlayingBars } from "@/components/track/Artwork";
 import { TrackCard } from "@/components/track/TrackRow";
 import { Button, ErrorState, EmptyState, Skeleton } from "@/components/ui/primitives";
-import { IconSearch, IconSparkle } from "@/components/ui/Icons";
+import { IconPlay, IconSearch, IconSparkle } from "@/components/ui/Icons";
 
 type ShelfResult<T> = { items: T[] } | { error: { code: ApiErrorCode; message: string; hint?: string } };
 
@@ -68,7 +69,8 @@ export default function HomePage() {
   return (
     <>
       <div className="animate-rise">
-        <Hero />
+        <Hero trending={trending} />
+        <MoodChips />
 
         {error && (
           <div className="px-4 pt-4 lg:px-6">
@@ -215,9 +217,48 @@ export default function HomePage() {
 
 /* -------------------------------- hero -------------------------------- */
 
-function Hero() {
+/** Each mood is just a search, so it costs no API quota until someone taps it. */
+const MOODS = [
+  { label: "Late night", q: "late night r&b" },
+  { label: "Focus", q: "lofi beats to focus" },
+  { label: "Workout", q: "workout hip hop mix" },
+  { label: "Feel-good", q: "feel good pop hits" },
+  { label: "Rainy day", q: "rainy day acoustic songs" },
+  { label: "Throwbacks", q: "2000s throwback hits" },
+  { label: "Latin heat", q: "reggaeton hits" },
+];
+
+function MoodChips() {
+  return (
+    <nav aria-label="Start with a mood" className="no-scrollbar mt-5 flex gap-2 overflow-x-auto px-4 lg:px-6">
+      {MOODS.map((m) => (
+        <Link
+          key={m.label}
+          href={`/search?q=${encodeURIComponent(m.q)}`}
+          className="shrink-0 rounded-[var(--r-full)] bg-[var(--surface-2)] px-4 py-2 text-[0.8125rem] font-medium text-[var(--text-dim)] transition-colors hover:bg-[var(--surface-3)] hover:text-[var(--text)]"
+        >
+          {m.label}
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
+function Hero({ trending }: { trending: Track[] }) {
   const user = useStore((s) => s.user);
   const hydrated = useStore((s) => s.hydrated);
+  const router = useRouter();
+
+  // One tap to music: start the chart and open the full player, so the first
+  // thing a visitor sees is the product rather than a description of it.
+  function startListening() {
+    if (!trending.length) {
+      router.push("/search");
+      return;
+    }
+    playCollection(trending, 0, { type: "trending", id: null, name: "Trending in music" });
+    setExpanded(true);
+  }
 
   const hour = new Date().getHours();
   const greeting =
@@ -233,39 +274,35 @@ function Hero() {
 
   if (!user) {
     return (
-      <div className="px-4 pt-6 lg:px-6 lg:pt-10">
-        <div className="relative overflow-hidden rounded-[var(--r-lg)] bg-[var(--surface)] p-6 sm:p-10">
+      <div className="px-4 pt-4 lg:px-6 lg:pt-8">
+        <div className="relative overflow-hidden rounded-[var(--r-lg)] bg-[var(--surface)] px-5 py-6 sm:p-10">
           <div
-            className="pointer-events-none absolute inset-0 opacity-40"
+            className="pointer-events-none absolute inset-0 opacity-50"
             style={{
               backgroundImage:
                 "radial-gradient(70% 90% at 90% 0%, color-mix(in oklab, var(--accent-to) 30%, transparent), transparent 65%)",
             }}
           />
           <div className="relative">
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Your music, <span className="brand-text">your way</span>
+            <h1 className="max-w-2xl text-[1.75rem] leading-[1.1] font-bold tracking-tight sm:text-5xl">
+              Every song on YouTube.{" "}
+              <span className="brand-text sm:block">A player built for listening.</span>
             </h1>
-            <p className="mt-2 max-w-md text-sm leading-relaxed text-[var(--text-dim)]">
-              Search YouTube, build playlists that stay yours, and listen in a player designed for
-              music instead of video. Free, and no ads added by us.
+            <p className="mt-3 max-w-md text-sm leading-relaxed text-[var(--text-dim)] sm:text-[0.9375rem]">
+              Synced lyrics, a real queue and playlists that stay yours. Nothing to install, and no
+              account needed to press play.
             </p>
             <div className="mt-5 flex flex-wrap gap-2.5">
+              <Button variant="primary" size="lg" onClick={startListening}>
+                <IconPlay size={18} className="-ml-1 mr-2" />
+                Start listening
+              </Button>
               <Link href="/signup">
-                <Button variant="primary" size="lg">
+                <Button variant="secondary" size="lg">
                   Create a free account
                 </Button>
               </Link>
-              <Link href="/search">
-                <Button variant="secondary" size="lg">
-                  Just start searching
-                </Button>
-              </Link>
             </div>
-            <p className="mt-4 text-[0.75rem] text-[var(--text-mute)]">
-              You can search and play without an account. Sign in to keep playlists, favorites and
-              history across devices.
-            </p>
           </div>
         </div>
       </div>
@@ -307,10 +344,10 @@ function NowPlayingCard() {
             {isPlaying ? "Now playing" : "Paused"}
           </span>
           <span className="mt-1 block truncate text-[0.9375rem] font-medium text-[var(--text)]">
-            {cleanTitle(track.title)}
+            {cleanTitle(track)}
           </span>
           <span className="mt-0.5 block truncate text-[0.8125rem] text-[var(--text-dim)]">
-            {cleanArtist(track.channelTitle)}
+            {cleanArtist(track)}
             {context ? ` · from ${context.name}` : ""}
           </span>
         </span>

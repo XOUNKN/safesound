@@ -43,22 +43,92 @@ export function relativeTime(ts: number): string {
   return new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-/**
- * YouTube music titles are usually "Artist - Song (Official Video)". We show
- * the raw title as the primary line (it is what the uploader chose) but strip
- * the noisiest suffixes so rows stay readable.
- */
-export function cleanTitle(title: string): string {
-  return title
-    .replace(/\s*[([][^)\]]*\b(official|lyric|audio|video|visuali[sz]er|hd|4k|mv)\b[^)\]]*[)\]]/gi, "")
-    .replace(/\s*[|｜]\s*official.*$/i, "")
+/* ------------------------- title & artist labels ------------------------ */
+
+type Labelled = Pick<Track, "title" | "channelTitle">;
+
+/** "(Official Video)", "[4K]", "(Lyric Video)"… anywhere in the title. */
+const BRACKET_NOISE =
+  /\s*[([][^)\]]*\b(official|lyrics?|audio|video|visuali[sz]er|hd|hq|4k|mv|m\/v)\b[^)\]]*[)\]]/gi;
+/** Unbracketed trailing noise: `Song Official Music Video`, `Song | Official Audio`. */
+const TRAILING_NOISE =
+  /\s*[-–—|｜]?\s*\b(official\s+(music\s+)?(video|audio|visuali[sz]er|lyric\s+video)|lyric\s+video|music\s+video)\s*$/i;
+/** "Song - Remastered 2011" is a version tag, not "Artist - Song". */
+const VERSION_TAG =
+  /^(\d{4}\s+)?(remaster|live\b|acoustic|demo|mono|stereo|single|radio|extended|edit\b|version|mix\b|remix|instrumental|sped|slowed|from\b)/i;
+
+function stripNoise(s: string): string {
+  return s
+    .replace(BRACKET_NOISE, "")
+    .replace(/\s*\((original\s+)?song\)/gi, "")
+    .replace(TRAILING_NOISE, "")
     .replace(/\s{2,}/g, " ")
-    .trim() || title;
+    .trim();
 }
 
-/** "Rick Astley - Topic" reads better as just "Rick Astley". */
-export function cleanArtist(channelTitle: string): string {
-  return channelTitle.replace(/\s*-\s*Topic$/i, "").trim() || channelTitle;
+/** `"Joseph" (feat. …)` → `Joseph (feat. …)` */
+function unquote(s: string): string {
+  return s.replace(/^["“]\s*([^"”]+?)\s*["”]/, "$1").trim();
+}
+
+/** "Rick Astley - Topic" → "Rick Astley", "TroyeSivanVEVO" → "Troye Sivan". */
+function channelArtist(channelTitle: string): string {
+  const topic = channelTitle.replace(/\s*-\s*Topic$/i, "");
+  if (topic !== channelTitle) return topic.trim() || channelTitle;
+  const vevo = channelTitle.replace(/VEVO$/i, "");
+  if (vevo !== channelTitle) return vevo.replace(/([a-z])([A-Z])/g, "$1 $2").trim() || channelTitle;
+  return channelTitle.trim();
+}
+
+/**
+ * YouTube music titles are usually "Artist - Song (Official Video)" on a
+ * channel that may be the artist, a label or VEVO. Split that into the song
+ * and the performer so rows read like a music app, not a video list. Anything
+ * that doesn't match a known shape keeps the uploader's title and uses the
+ * channel as the artist.
+ */
+export function trackLabels(track: Labelled): { title: string; artist: string } {
+  const channel = channelArtist(track.channelTitle);
+  const title = stripNoise(track.title) || track.title;
+
+  // "- Topic" channels are YouTube's auto-generated album tracks: the title is
+  // already just the song, so a dash inside it is part of the name.
+  if (!/-\s*Topic$/i.test(track.channelTitle)) {
+    const dash = title.match(/^(.{1,80}?)\s+[-–—]\s+(.+)$/);
+    if (dash && !VERSION_TAG.test(dash[2]!)) {
+      const artist = dash[1]!.trim();
+      const ch = channel.toLowerCase();
+      // "Song - Channel × Guest (original song)": the channel names the right side.
+      if (ch && !artist.toLowerCase().includes(ch) && dash[2]!.toLowerCase().startsWith(ch)) {
+        return { title: unquote(artist), artist: dash[2]!.replace(/\s*\([^)]*\)\s*$/, "").trim() };
+      }
+      return {
+        title: unquote(dash[2]!) || title,
+        // Prefer the channel's casing when it's the same name ("DRAKE" → "Drake").
+        artist: artist.toLowerCase() === channel.toLowerCase() ? channel : artist,
+      };
+    }
+
+    // Papoose "Jezebel"
+    const quoted = title.match(/^([^"“]{1,80}?)\s+["“]([^"”]+)["”]\s*(.*)$/);
+    if (quoted) {
+      return { title: `${quoted[2]!.trim()} ${quoted[3]!}`.trim(), artist: quoted[1]!.trim() };
+    }
+
+    // "Song | Artist | Producer" — the song leads.
+    const piped = title.split(/\s+[|｜]\s+/);
+    if (piped.length > 1 && piped[0]) return { title: piped[0].trim(), artist: channel };
+  }
+
+  return { title: unquote(title) || title, artist: channel };
+}
+
+export function cleanTitle(track: Labelled): string {
+  return trackLabels(track).title;
+}
+
+export function cleanArtist(track: Labelled): string {
+  return trackLabels(track).artist;
 }
 
 /**

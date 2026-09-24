@@ -97,10 +97,10 @@ export default function LyricsPanel() {
         <header className="pt-safe flex shrink-0 items-start gap-3 border-b border-[var(--border-soft)] px-5 py-4">
           <div className="min-w-0 flex-1">
             <h2 className="truncate text-base font-semibold tracking-tight text-[var(--text)]">
-              {cleanTitle(track.title)}
+              {cleanTitle(track)}
             </h2>
             <p className="mt-0.5 truncate text-[0.8125rem] text-[var(--text-dim)]">
-              {cleanArtist(track.channelTitle)}
+              {cleanArtist(track)}
             </p>
           </div>
           <IconButton label="Close lyrics" onClick={closeSheet} size={36}>

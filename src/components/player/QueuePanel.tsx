@@ -106,10 +106,10 @@ export default function QueuePanel() {
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[0.875rem] font-medium text-[var(--accent)]">
-                    {cleanTitle(current.track.title)}
+                    {cleanTitle(current.track)}
                   </span>
                   <span className="mt-0.5 block truncate text-[0.75rem] text-[var(--text-dim)]">
-                    {cleanArtist(current.track.channelTitle)}
+                    {cleanArtist(current.track)}
                   </span>
                 </span>
                 <button
@@ -170,7 +170,7 @@ export default function QueuePanel() {
                         {...handleProps(i, upNext.length)}
                         role="button"
                         tabIndex={0}
-                        aria-label={`Reorder ${cleanTitle(item.track.title)}. Use arrow keys to move.`}
+                        aria-label={`Reorder ${cleanTitle(item.track)}. Use arrow keys to move.`}
                         className="grid shrink-0 cursor-grab touch-none place-items-center rounded-lg p-1 text-[var(--text-mute)] hover:text-[var(--text)] active:cursor-grabbing"
                       >
                         <IconDrag size={17} />
@@ -180,15 +180,15 @@ export default function QueuePanel() {
                         type="button"
                         onClick={() => jumpToQid(item.qid)}
                         className="flex min-w-0 flex-1 items-center gap-3 text-left"
-                        aria-label={`Play ${cleanTitle(item.track.title)} now`}
+                        aria-label={`Play ${cleanTitle(item.track)} now`}
                       >
                         <Artwork track={item.track} className="h-11 w-11 shrink-0" />
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-[0.875rem] font-medium text-[var(--text)]">
-                            {cleanTitle(item.track.title)}
+                            {cleanTitle(item.track)}
                           </span>
                           <span className="mt-0.5 block truncate text-[0.75rem] text-[var(--text-dim)]">
-                            {cleanArtist(item.track.channelTitle)}
+                            {cleanArtist(item.track)}
                           </span>
                         </span>
                       </button>
@@ -199,7 +199,7 @@ export default function QueuePanel() {
 
                       <button
                         type="button"
-                        aria-label={`Remove ${cleanTitle(item.track.title)} from queue`}
+                        aria-label={`Remove ${cleanTitle(item.track)} from queue`}
                         onClick={() => removeFromQueue(item.qid)}
                         className="shrink-0 rounded-full p-1.5 text-[var(--text-mute)] transition-colors hover:bg-[var(--surface-3)] hover:text-[var(--danger)]"
                       >
@@ -208,7 +208,7 @@ export default function QueuePanel() {
 
                       <button
                         type="button"
-                        aria-label={`More options for ${cleanTitle(item.track.title)}`}
+                        aria-label={`More options for ${cleanTitle(item.track)}`}
                         onClick={() =>
                           openSheet({ kind: "track-menu", track: item.track, origin: "queue" })
                         }

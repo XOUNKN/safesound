@@ -27,6 +27,7 @@ The SQLite database is created automatically on first boot at `data/resonate.db`
 | `AUTH_SECRET` | In production | Pepper for session and reset-token digests. Generate with `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"`. In development a random one is written to `data/.dev-auth-secret`. |
 | `YOUTUBE_REGION` | No | ISO-3166 country for the Trending chart. Defaults to `US`. |
 | `DATABASE_PATH` | No | SQLite file path. Defaults to `./data/resonate.db`. |
+| `SITE_URL` | No | Public origin used in share-link previews (Open Graph). Falls back to Render's `RENDER_EXTERNAL_URL`, then `http://localhost:3000`. Set it for a custom domain. |
 
 **Without `YOUTUBE_API_KEY`, the app still runs.** Sign-up, playlists, favorites, history,
 the queue, lyrics and playback all work; search and trending report — honestly and
@@ -86,8 +87,8 @@ playback cuts cleanly rather than leaving silence.
 
 An equalizer (bass / mid / treble / presets). Shaping audio requires the decoded signal in a
 Web Audio graph, and YouTube playback happens inside a cross-origin iframe the page cannot
-reach. Rather than ship sliders that move without doing anything, Settings shows an
-"Unavailable" card explaining why. Volume — which the IFrame API genuinely exposes — works.
+reach. Rather than ship sliders that move without doing anything, Settings leaves it out.
+Volume — which the IFrame API genuinely exposes — works.
 
 ---
 

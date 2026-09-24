@@ -63,7 +63,7 @@ function TrackMenu({
   );
   const [removing, setRemoving] = useState(false);
 
-  const title = cleanTitle(track.title);
+  const title = cleanTitle(track);
 
   const run = (fn: () => void) => () => {
     fn();
@@ -94,7 +94,7 @@ function TrackMenu({
         <div className="min-w-0 flex-1">
           <p className="truncate text-[0.9375rem] font-semibold text-[var(--text)]">{title}</p>
           <p className="mt-0.5 truncate text-[0.8125rem] text-[var(--text-dim)]">
-            {cleanArtist(track.channelTitle)}
+            {cleanArtist(track)}
           </p>
         </div>
       </div>
@@ -186,7 +186,7 @@ function AddToPlaylist({ tracks }: { tracks: Track[] }) {
       onClose={closeSheet}
       title="Add to playlist"
       description={
-        tracks.length === 1 ? cleanTitle(tracks[0]!.title) : `${pluralize(tracks.length, "track")} selected`
+        tracks.length === 1 ? cleanTitle(tracks[0]!) : `${pluralize(tracks.length, "track")} selected`
       }
     >
       <div className="px-3.5 pb-2">

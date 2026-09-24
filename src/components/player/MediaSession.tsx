@@ -34,8 +34,8 @@ export default function MediaSession() {
     }
 
     ms.metadata = new MediaMetadata({
-      title: cleanTitle(track.title),
-      artist: cleanArtist(track.channelTitle),
+      title: cleanTitle(track),
+      artist: cleanArtist(track),
       album: "Resonate",
       artwork: [96, 128, 192, 256, 384, 512].map((size) => ({
         src: track.thumbnailUrl ?? `https://i.ytimg.com/vi/${track.videoId}/hqdefault.jpg`,

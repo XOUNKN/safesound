@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import AppShell from "@/components/AppShell";
+import { BRAND, siteUrl } from "@/server/brand";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -10,12 +11,19 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: { default: "Resonate — your music, your way", template: "%s · Resonate" },
-  description:
-    "Search YouTube for music, build playlists and queues, and listen in a player made for music. Powered by the official YouTube player.",
+  metadataBase: siteUrl(),
+  title: { default: `Resonate: ${BRAND.tagline}`, template: "%s · Resonate" },
+  description: BRAND.description,
   applicationName: "Resonate",
   appleWebApp: { capable: true, title: "Resonate", statusBarStyle: "black-translucent" },
   formatDetection: { telephone: false },
+  openGraph: {
+    type: "website",
+    siteName: "Resonate",
+    title: `Resonate: ${BRAND.tagline}`,
+    description: BRAND.description,
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {

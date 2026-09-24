@@ -17,21 +17,15 @@ import { MobileHeader, Avatar } from "@/components/nav/Navigation";
 import { Section, Row, ToggleRow, OptionRows, UnavailableCard } from "@/components/settings/controls";
 import { Button, IconButton, TextField } from "@/components/ui/primitives";
 import { Sheet, ConfirmDialog } from "@/components/ui/Sheet";
-import {
-  IconEq,
-  IconMonitor,
-  IconMoon,
-  IconSignOut,
-  IconSun,
-  IconVolume,
-} from "@/components/ui/Icons";
+import { IconSignOut, IconVolume } from "@/components/ui/Icons";
 
+/** Must match the server's accent enum and the `data-accent` blocks in globals.css. */
 const ACCENTS: { value: string; label: string; swatch: string }[] = [
-  { value: "violet", label: "Violet", swatch: "linear-gradient(135deg,#8b5cf6,#22d3ee)" },
-  { value: "cyan", label: "Cyan", swatch: "linear-gradient(135deg,#22d3ee,#6366f1)" },
-  { value: "amber", label: "Amber", swatch: "linear-gradient(135deg,#fbbf24,#fb7185)" },
-  { value: "rose", label: "Rose", swatch: "linear-gradient(135deg,#fb7185,#a78bfa)" },
-  { value: "lime", label: "Lime", swatch: "linear-gradient(135deg,#a3e635,#22d3ee)" },
+  { value: "ember", label: "Ember", swatch: "linear-gradient(135deg,#ffbe00,#e85e0a)" },
+  { value: "violet", label: "Violet", swatch: "linear-gradient(135deg,#a78bfa,#7c3aed)" },
+  { value: "cyan", label: "Cyan", swatch: "linear-gradient(135deg,#67e8f9,#0891b2)" },
+  { value: "rose", label: "Rose", swatch: "linear-gradient(135deg,#fda4af,#e11d48)" },
+  { value: "lime", label: "Lime", swatch: "linear-gradient(135deg,#d9f99d,#65a30d)" },
 ];
 
 const CROSSFADE = [0, 2, 4, 6, 8, 10];
@@ -104,16 +98,6 @@ export default function SettingsPage() {
 
         {/* ---------------------------- appearance ---------------------------- */}
         <Section title="Appearance">
-          <OptionRows
-            name="Theme"
-            value={settings.theme}
-            onChange={(theme) => updateSettings({ theme })}
-            options={[
-              { value: "system", label: "Match system", icon: <IconMonitor size={19} /> },
-              { value: "dark", label: "Dark", icon: <IconMoon size={19} /> },
-              { value: "light", label: "Light", icon: <IconSun size={19} /> },
-            ]}
-          />
           <div className="border-b border-[var(--border-soft)] px-4 py-4">
             <p className="text-[0.9375rem] text-[var(--text)]">Accent colour</p>
             <div className="mt-3 flex gap-3">
@@ -174,7 +158,7 @@ export default function SettingsPage() {
         {/* ---------------------------- crossfade ----------------------------- */}
         <Section
           title="Crossfade"
-          description="Resonate runs two official YouTube players and ramps their volumes in opposite directions, so one track really does fade into the next. No audio is intercepted or re-encoded."
+          description="Blend the end of each song into the start of the next, so the music never stops."
         >
           <OptionRows
             name="Crossfade length"
@@ -189,17 +173,11 @@ export default function SettingsPage() {
                   : undefined,
             }))}
           />
-          <div className="px-4 py-3.5">
-            <p className="text-[0.75rem] leading-relaxed text-[var(--text-mute)]">
-              If a browser refuses to auto-start the incoming player, Resonate cancels the fade and
-              cuts cleanly instead of leaving a gap of silence.
-            </p>
-          </div>
         </Section>
 
         {/* ------------------------------ audio ------------------------------- */}
         <Section title="Audio">
-          <div className="border-b border-[var(--border-soft)] px-4 py-4">
+          <div className="px-4 py-4">
             <div className="flex items-center justify-between">
               <p className="text-[0.9375rem] text-[var(--text)]">Volume</p>
               <span className="text-[0.8125rem] tabular-nums text-[var(--text-mute)]">{volume}</span>
@@ -220,22 +198,15 @@ export default function SettingsPage() {
               />
             </div>
             <p className="mt-2.5 text-[0.75rem] leading-relaxed text-[var(--text-mute)]">
-              Applied through the YouTube player&rsquo;s own volume control. On iOS, the system
-              volume buttons take over — that&rsquo;s an Apple restriction on web audio.
+              On iPhone and iPad, use the volume buttons on the side instead.
             </p>
           </div>
-
-          <UnavailableCard
-            title="Equalizer, bass, mid and treble"
-            reason="Shaping the audio needs the raw signal in a Web Audio graph. YouTube playback happens inside a cross-origin iframe, so the audio never reaches this page — there is nothing to filter, and reaching into it would mean breaking the player's restrictions."
-            instead="Rather than ship sliders that move but change nothing, Resonate leaves this out. Volume above is the one audio control that genuinely works."
-          />
         </Section>
 
         {/* ------------------------------ lyrics ------------------------------ */}
         <Section
           title="Lyrics"
-          description="Lyrics come from LRCLIB, an openly licensed community lyrics database with a public API. Nothing is scraped, and lyrics are only shown inside the player."
+          description="Time-synced lyrics from LRCLIB, a free community lyrics library."
         >
           <ToggleRow
             label="Enable lyrics"

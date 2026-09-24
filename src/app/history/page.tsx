@@ -95,7 +95,7 @@ export default function HistoryPage() {
         context={{ type: "history", id: null, name: "Recently played" }}
         subtitleFor={(t) => {
           const e = tracks.find((x) => x.videoId === t.videoId);
-          return e ? `${cleanArtist(t.channelTitle)} · ${relativeTime(e.playedAt)}` : undefined;
+          return e ? `${cleanArtist(t)} · ${relativeTime(e.playedAt)}` : undefined;
         }}
         headerExtra={
           <Button variant="ghost" onClick={() => setConfirm(true)}>

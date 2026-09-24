@@ -146,26 +146,30 @@ h3 {
 /* ---------------------------------------------------------------- *
    Scrollbars — thin, near-invisible until hovered
  * ---------------------------------------------------------------- */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--surface-4) transparent;
-}
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--surface-4);
-  border-radius: var(--r-full);
-  border: 3px solid transparent;
-  background-clip: content-box;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #333;
-  background-clip: content-box;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
+/* In the base layer so utilities such as no-scrollbar can override it;
+   unlayered CSS would beat every Tailwind utility. */
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--surface-4) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--surface-4);
+    border-radius: var(--r-full);
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #333;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
 }
 
 /* ---------------------------------------------------------------- *

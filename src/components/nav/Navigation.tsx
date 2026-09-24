@@ -16,7 +16,6 @@ import {
   IconPlaylist,
   IconSearch,
   IconSettings,
-  IconUpload,
   IconUser,
 } from "@/components/ui/Icons";
 
@@ -354,31 +353,22 @@ export function TopHeader({ onOpenMenu }: { onOpenMenu: () => void }) {
           <IconSearch size={20} />
         </Link>
 
-        <div className="ml-auto hidden shrink-0 items-center gap-3 sm:flex">
-          {!user && (
-            <>
-              <Link
-                href="/login"
-                className="rounded-[var(--r-sm)] px-2 py-1.5 text-[0.8125rem] font-medium text-[var(--text)] transition-opacity hover:opacity-70"
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/signup"
-                className="rounded-[var(--r-sm)] px-2 py-1.5 text-[0.8125rem] font-medium text-[var(--text)] transition-opacity hover:opacity-70"
-              >
-                Sign Up
-              </Link>
-            </>
-          )}
-          <Link
-            href="/search"
-            className="brand-gradient brighten inline-flex h-9 items-center gap-2 rounded-[var(--r-full)] px-4 text-[0.8125rem] font-bold text-[var(--on-accent)] transition-[filter]"
-          >
-            <IconUpload size={17} />
-            <span className="hidden md:inline">Add music</span>
-          </Link>
-        </div>
+        {!user && (
+          <div className="ml-auto hidden shrink-0 items-center gap-3 sm:flex">
+            <Link
+              href="/login"
+              className="rounded-[var(--r-sm)] px-2 py-1.5 text-[0.8125rem] font-medium text-[var(--text)] transition-opacity hover:opacity-70"
+            >
+              Sign in
+            </Link>
+            <Link
+              href="/signup"
+              className="brand-gradient brighten inline-flex h-9 items-center rounded-[var(--r-full)] px-4 text-[0.8125rem] font-bold text-[var(--on-accent)] transition-[filter]"
+            >
+              Sign up free
+            </Link>
+          </div>
+        )}
       </div>
     </header>
   );

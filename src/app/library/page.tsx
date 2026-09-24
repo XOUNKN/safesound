@@ -239,7 +239,7 @@ function RecentTab({ loading, tracks }: { loading: boolean; tracks: Entry[] }) {
             track={track}
             index={i}
             showIndex
-            subtitle={`${cleanArtist(track.channelTitle)} · ${relativeTime(track.playedAt)}`}
+            subtitle={`${cleanArtist(track)} · ${relativeTime(track.playedAt)}`}
             onPlay={() =>
               playCollection(tracks, i, { type: "history", id: null, name: "Recently played" })
             }
