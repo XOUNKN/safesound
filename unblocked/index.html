@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Study Hub</title>
+<link id="favicon" rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%232563eb'/%3E%3Ctext x='32' y='44' font-family='Arial' font-size='40' font-weight='bold' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">S</span>
+    <span class="brand-name">Study Hub</span>
+  </div>
+  <div class="search-wrap">
+    <input id="search" type="search" placeholder="Search games..." autocomplete="off" />
+  </div>
+  <div class="actions">
+    <button id="aboutBlankBtn" title="Open in about:blank (hides URL from history)">about:blank</button>
+    <div class="cloak">
+      <label for="cloakSel">Tab:</label>
+      <select id="cloakSel">
+        <option value="default">Study Hub</option>
+        <option value="classroom">Google Classroom</option>
+        <option value="docs">Google Docs</option>
+        <option value="drive">Google Drive</option>
+        <option value="khan">Khan Academy</option>
+        <option value="canvas">Canvas</option>
+        <option value="wiki">Wikipedia</option>
+      </select>
+    </div>
+    <button id="panicBtn" title="Panic (also: press ` key)">Panic</button>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <h1>Pick something to play</h1>
+    <p class="muted">All games run locally in your browser. No sign-in. No external requests.</p>
+  </section>
+
+  <section id="grid" class="grid"></section>
+
+  <section class="tips">
+    <h2>Shortcuts</h2>
+    <ul>
+      <li><kbd>`</kbd> — panic: jumps to google.com</li>
+      <li><kbd>/</kbd> — focus search</li>
+      <li><kbd>Esc</kbd> — leave a game</li>
+    </ul>
+  </section>
+</main>
+
+<footer>
+  <span class="muted">Local-only. No tracking.</span>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>

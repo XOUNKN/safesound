@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Paddles</title>
+<link id="favicon" rel="icon" href="" />
+<link rel="stylesheet" href="../styles.css" />
+</head>
+<body class="game">
+<div class="game-wrap">
+  <div class="game-bar">
+    <a href="../index.html">&larr; Back</a>
+    <span id="score">0 : 0</span>
+  </div>
+  <div class="game-canvas-wrap">
+    <canvas id="c" width="640" height="400"></canvas>
+    <div id="over" class="overlay" hidden><span id="overText">Space to start</span></div>
+  </div>
+  <div class="game-hint">W / S or mouse. Space to serve. Esc to leave. First to 7.</div>
+</div>
+<script src="../cloak-inherit.js"></script>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+const PW = 10, PH = 70;
+let left, right, ball, scoreL, scoreR, running, keys = {};
+
+function reset(serveToLeft = Math.random()<0.5) {
+  left  = { x: 20, y: H/2 - PH/2 };
+  right = { x: W - 20 - PW, y: H/2 - PH/2 };
+  ball = { x: W/2, y: H/2, vx: 0, vy: 0, r: 7, pending: true, serveLeft: serveToLeft };
+  showOverlay('Space to serve');
+}
+function newGame() { scoreL = 0; scoreR = 0; reset(); updateScore(); }
+function updateScore(){ document.getElementById('score').textContent = `${scoreL} : ${scoreR}`; }
+
+function serve() {
+  ball.pending = false;
+  const angle = (Math.random()*0.6 - 0.3);
+  const speed = 5;
+  ball.vx = (ball.serveLeft ? -1 : 1) * speed * Math.cos(angle);
+  ball.vy = speed * Math.sin(angle);
+  hideOverlay();
+}
+
+function loop() {
+  // Input
+  if (keys['w'] || keys['W']) left.y -= 6;
+  if (keys['s'] || keys['S']) left.y += 6;
+  left.y = Math.max(0, Math.min(H - PH, left.y));
+
+  // Simple AI with small deadzone
+  if (!ball.pending) {
+    const target = ball.y - PH/2;
+    const dy = target - right.y;
+    const max = 5;
+    right.y += Math.max(-max, Math.min(max, dy*0.08));
+    right.y = Math.max(0, Math.min(H - PH, right.y));
+  }
+
+  if (!ball.pending) {
+    ball.x += ball.vx; ball.y += ball.vy;
+    if (ball.y < ball.r) { ball.y = ball.r; ball.vy *= -1; }
+    if (ball.y > H - ball.r) { ball.y = H - ball.r; ball.vy *= -1; }
+    // left paddle
+    if (ball.x - ball.r < left.x + PW && ball.y > left.y && ball.y < left.y + PH && ball.vx < 0) {
+      ball.vx *= -1.05;
+      const rel = (ball.y - (left.y + PH/2)) / (PH/2);
+      ball.vy = rel * 6;
+    }
+    // right paddle
+    if (ball.x + ball.r > right.x && ball.y > right.y && ball.y < right.y + PH && ball.vx > 0) {
+      ball.vx *= -1.05;
+      const rel = (ball.y - (right.y + PH/2)) / (PH/2);
+      ball.vy = rel * 6;
+    }
+    if (ball.x < -20) { scoreR++; updateScore(); endPoint(false); }
+    else if (ball.x > W + 20) { scoreL++; updateScore(); endPoint(true); }
+  }
+  draw();
+  requestAnimationFrame(loop);
+}
+function endPoint(nextServeLeft) {
+  if (scoreL >= 7 || scoreR >= 7) {
+    running = false;
+    showOverlay((scoreL>scoreR?'You win':'You lose') + ' — Space to play again');
+    newGame.pending = true;
+  } else {
+    reset(nextServeLeft);
+  }
+}
+function draw() {
+  ctx.fillStyle = '#0a0f1d'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle = '#262e58';
+  ctx.setLineDash([6,8]); ctx.beginPath(); ctx.moveTo(W/2,0); ctx.lineTo(W/2,H); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle = '#e8ecf4';
+  ctx.fillRect(left.x, left.y, PW, PH);
+  ctx.fillRect(right.x, right.y, PW, PH);
+  ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2); ctx.fill();
+}
+function showOverlay(t) { const o=document.getElementById('over'); document.getElementById('overText').textContent=t; o.hidden=false; }
+function hideOverlay() { document.getElementById('over').hidden = true; }
+
+document.addEventListener('keydown', (e) => {
+  keys[e.key] = true;
+  if (e.key === ' ') {
+    if (newGame.pending) { newGame(); newGame.pending = false; }
+    else if (ball.pending) serve();
+    e.preventDefault();
+  }
+  if (e.key === 'Escape') window.location.href = '../index.html';
+});
+document.addEventListener('keyup', (e) => { keys[e.key] = false; });
+
+canvas.addEventListener('mousemove', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const y = (e.clientY - rect.top) * (H / rect.height);
+  left.y = Math.max(0, Math.min(H - PH, y - PH/2));
+});
+canvas.addEventListener('touchmove', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const y = (e.touches[0].clientY - rect.top) * (H / rect.height);
+  left.y = Math.max(0, Math.min(H - PH, y - PH/2));
+  e.preventDefault();
+}, {passive:false});
+
+newGame();
+loop();
+</script>
+</body>
+</html>

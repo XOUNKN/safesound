@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Flapper</title>
+<link id="favicon" rel="icon" href="" />
+<link rel="stylesheet" href="../styles.css" />
+</head>
+<body class="game">
+<div class="game-wrap">
+  <div class="game-bar">
+    <a href="../index.html">&larr; Back</a>
+    <span id="score">Score 0 &middot; Best 0</span>
+  </div>
+  <div class="game-canvas-wrap">
+    <canvas id="c" width="360" height="560"></canvas>
+    <div id="over" class="overlay" hidden><span id="overText">Space / tap to flap</span></div>
+  </div>
+  <div class="game-hint">Space / click / tap. Esc to leave.</div>
+</div>
+<script src="../cloak-inherit.js"></script>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+const BEST_KEY = 'flappy.best';
+const GRAVITY = 0.4;
+const FLAP = -7;
+const GAP = 140;
+const PIPE_W = 50;
+const SPEED = 2.2;
+let bird, pipes, score, best, dead, started, spawnCounter;
+
+function reset() {
+  bird = { x: 80, y: H/2, vy: 0, r: 12 };
+  pipes = [];
+  spawnCounter = 0;
+  score = 0;
+  best = Number(localStorage.getItem(BEST_KEY) || 0);
+  dead = false; started = false;
+  updateScore();
+  showOverlay('Space / tap to flap');
+}
+function updateScore(){ document.getElementById('score').textContent = `Score ${score} · Best ${best}`; }
+
+function spawnPipe() {
+  const minTop = 40, maxTop = H - GAP - 80;
+  const top = minTop + Math.random()*(maxTop - minTop);
+  pipes.push({ x: W, top, scored: false });
+}
+function loop() {
+  if (started && !dead) {
+    bird.vy += GRAVITY;
+    bird.y += bird.vy;
+    for (const p of pipes) p.x -= SPEED;
+    spawnCounter++;
+    if (spawnCounter > 90) { spawnCounter = 0; spawnPipe(); }
+    pipes = pipes.filter(p => p.x + PIPE_W > -10);
+
+    // collisions
+    if (bird.y + bird.r > H - 20 || bird.y - bird.r < 0) die();
+    for (const p of pipes) {
+      if (bird.x + bird.r > p.x && bird.x - bird.r < p.x + PIPE_W) {
+        if (bird.y - bird.r < p.top || bird.y + bird.r > p.top + GAP) { die(); break; }
+      }
+      if (!p.scored && p.x + PIPE_W < bird.x - bird.r) {
+        p.scored = true; score++;
+        if (score > best) { best = score; localStorage.setItem(BEST_KEY, best); }
+        updateScore();
+      }
+    }
+  }
+  draw();
+  requestAnimationFrame(loop);
+}
+function die() {
+  if (dead) return;
+  dead = true;
+  showOverlay('Dead. Space to restart.');
+}
+function draw() {
+  // sky
+  ctx.fillStyle = '#0a0f1d'; ctx.fillRect(0,0,W,H);
+  // ground
+  ctx.fillStyle = '#1b2240'; ctx.fillRect(0, H-20, W, 20);
+  // pipes
+  ctx.fillStyle = '#22c55e';
+  for (const p of pipes) {
+    ctx.fillRect(p.x, 0, PIPE_W, p.top);
+    ctx.fillRect(p.x, p.top + GAP, PIPE_W, H - 20 - (p.top+GAP));
+  }
+  // bird
+  ctx.fillStyle = '#eab308';
+  ctx.beginPath(); ctx.arc(bird.x, bird.y, bird.r, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(bird.x+4, bird.y-3, 2, 0, Math.PI*2); ctx.fill();
+}
+function flap() {
+  if (dead) { reset(); return; }
+  if (!started) { started = true; hideOverlay(); }
+  bird.vy = FLAP;
+}
+function showOverlay(t) { const o=document.getElementById('over'); document.getElementById('overText').textContent=t; o.hidden=false; }
+function hideOverlay() { document.getElementById('over').hidden = true; }
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === ' ') { flap(); e.preventDefault(); }
+  if (e.key === 'Escape') window.location.href = '../index.html';
+});
+canvas.addEventListener('mousedown', flap);
+canvas.addEventListener('touchstart', (e) => { flap(); e.preventDefault(); }, {passive:false});
+
+reset();
+loop();
+</script>
+</body>
+</html>
