@@ -34,15 +34,27 @@
       t.textContent = 'Nothing playing';
       s.textContent = 'Pick a station or a track';
       art.classList.remove('live');
+      art.style.backgroundImage = '';
+      art.innerHTML = '<span>&#9835;</span>';
       return;
     }
     t.textContent = entry.name || entry.src || 'Track';
     const bits = [];
+    if (entry.artist) bits.push(entry.artist);
+    if (entry.album) bits.push(entry.album);
     if (entry.genre) bits.push(entry.genre);
     if (entry.codec) bits.push(entry.codec);
     if (entry.kind === 'station') bits.push('live');
+    if (entry.isPreview) bits.push('30s preview');
     s.textContent = bits.join(' · ');
     art.classList.toggle('live', entry.kind === 'station');
+    if (entry.artwork) {
+      art.style.backgroundImage = 'url(' + JSON.stringify(entry.artwork) + ')';
+      art.innerHTML = '';
+    } else {
+      art.style.backgroundImage = '';
+      art.innerHTML = '<span>&#9835;</span>';
+    }
   }
 
   function playEntry(entry) {
@@ -229,6 +241,168 @@
     });
   }
 
+  // ---------- Track search (iTunes previews + Internet Archive) --------
+  let trackSource = 'itunes';
+  let lastTrackResults = [];
+
+  function parseLength(x) {
+    if (x == null) return null;
+    if (typeof x === 'number') return Number.isFinite(x) ? x : null;
+    const s = String(x);
+    if (s.indexOf(':') !== -1) {
+      const parts = s.split(':').map(Number);
+      if (parts.length === 2) return parts[0] * 60 + parts[1];
+      if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+    }
+    const n = parseFloat(s);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  async function searchITunes(q) {
+    const url = 'https://itunes.apple.com/search?media=music&entity=song&limit=25&term=' + encodeURIComponent(q);
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    return (data.results || []).filter(r => r.previewUrl).map(r => ({
+      kind: 'search',
+      source: 'itunes',
+      name: r.trackName || '(untitled)',
+      artist: r.artistName || '',
+      album: r.collectionName || '',
+      genre: r.primaryGenreName || '',
+      duration: (r.trackTimeMillis || 0) / 1000 || null,
+      artwork: (r.artworkUrl100 || '').replace('100x100', '300x300'),
+      src: r.previewUrl,
+      isPreview: true,
+    }));
+  }
+
+  async function searchArchive(q) {
+    const qExpr = 'mediatype:(audio) AND (' + q + ')';
+    const url = 'https://archive.org/advancedsearch.php?q=' + encodeURIComponent(qExpr) +
+      '&fl[]=identifier&fl[]=title&fl[]=creator&fl[]=date' +
+      '&sort[]=downloads+desc&rows=15&page=1&output=json';
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    const docs = ((data.response && data.response.docs) || []).slice(0, 15);
+    const results = await Promise.all(docs.map(async d => {
+      try {
+        const mr = await fetch('https://archive.org/metadata/' + encodeURIComponent(d.identifier));
+        if (!mr.ok) return null;
+        const m = await mr.json();
+        const audio = (m.files || []).filter(f => /\.(mp3|ogg|m4a|flac|opus)$/i.test(f.name || ''));
+        if (!audio.length) return null;
+        const pref = audio.find(f => /mp3/i.test(f.format || f.name)) || audio[0];
+        const creator = Array.isArray(d.creator) ? d.creator[0] : d.creator;
+        return {
+          kind: 'search',
+          source: 'archive',
+          name: pref.title || d.title || d.identifier,
+          artist: creator || '',
+          album: d.title || '',
+          genre: '',
+          duration: parseLength(pref.length),
+          artwork: 'https://archive.org/services/img/' + encodeURIComponent(d.identifier),
+          src: 'https://archive.org/download/' + encodeURIComponent(d.identifier) + '/' + encodeURIComponent(pref.name),
+          isPreview: false,
+        };
+      } catch (_) { return null; }
+    }));
+    return results.filter(Boolean);
+  }
+
+  function getFavoriteTracks() { return LS.getJSON('favoriteTracks', []); }
+  function trackKey(t) { return t.source + '|' + (t.src || t.name); }
+  function toggleFavoriteTrack(t) {
+    const list = getFavoriteTracks();
+    const k = trackKey(t);
+    const i = list.findIndex(x => trackKey(x) === k);
+    if (i === -1) list.push({ source: t.source, name: t.name, artist: t.artist, album: t.album,
+                              duration: t.duration, artwork: t.artwork, src: t.src, isPreview: t.isPreview });
+    else list.splice(i, 1);
+    LS.setJSON('favoriteTracks', list);
+    renderTrackList(lastTrackResults);
+  }
+
+  function trackRow(t) {
+    const favs = getFavoriteTracks();
+    const k = trackKey(t);
+    const isFav = favs.some(x => trackKey(x) === k);
+    const row = document.createElement('div');
+    row.className = 'search-track-row';
+    const dur = Number.isFinite(t.duration) ? fmtTime(t.duration) : '';
+    row.innerHTML =
+      '<div class="artwork-thumb"' + (t.artwork ? (' style="background-image:url(' + JSON.stringify(t.artwork).replace(/</g, '&lt;') + ')"') : '') + '>' +
+        (t.artwork ? '' : '<span>&#9835;</span>') +
+      '</div>' +
+      '<div class="track-text">' +
+        '<div class="track-name">' + escapeHtml(t.name) + (t.isPreview ? ' <span class="pill pill-muted">30s</span>' : '') + '</div>' +
+        '<div class="track-sub muted">' + escapeHtml(t.artist) + (t.album ? ' · ' + escapeHtml(t.album) : '') + '</div>' +
+      '</div>' +
+      '<div class="track-dur muted">' + dur + '</div>' +
+      '<button class="heart-btn" title="' + (isFav ? 'Unfavorite' : 'Favorite') + '" aria-pressed="' + (isFav ? 'true' : 'false') + '">' + (isFav ? '&hearts;' : '&heartsuit;') + '</button>' +
+      '<button class="play-tile" title="Play">Play</button>' +
+      '<button class="queue-btn" title="Add to queue">+</button>';
+    row.querySelector('.heart-btn').addEventListener('click', (e) => { e.stopPropagation(); toggleFavoriteTrack(t); });
+    row.querySelector('.play-tile').addEventListener('click', () => enqueueAndPlay(t));
+    row.querySelector('.queue-btn').addEventListener('click', () => {
+      queue.push(t);
+      setStatus('Added "' + t.name + '" to queue (' + queue.length + ').');
+    });
+    row.addEventListener('dblclick', () => enqueueAndPlay(t));
+    return row;
+  }
+
+  function renderTrackList(results) {
+    const host = document.getElementById('trackSearchList');
+    if (!host) return;
+    host.innerHTML = '';
+    if (!results || !results.length) {
+      const favs = getFavoriteTracks();
+      if (favs.length) {
+        const h = document.createElement('h3');
+        h.textContent = 'Favorites';
+        h.style.margin = '14px 0 8px';
+        host.appendChild(h);
+        favs.forEach(t => host.appendChild(trackRow(t)));
+      } else {
+        host.innerHTML = '<p class="muted">Search above, or favorite tracks will appear here.</p>';
+      }
+      return;
+    }
+    results.forEach(t => host.appendChild(trackRow(t)));
+  }
+
+  async function runTrackSearch() {
+    const q = (document.getElementById('trackSearchInput').value || '').trim();
+    const status = document.getElementById('trackSearchStatus');
+    const list = document.getElementById('trackSearchList');
+    list.innerHTML = '';
+    lastTrackResults = [];
+    if (!q) { status.textContent = 'Type something, then press Search.'; return; }
+    status.textContent = 'Searching ' + (trackSource === 'itunes' ? 'iTunes...' : 'Internet Archive...');
+    try {
+      const results = trackSource === 'itunes' ? await searchITunes(q) : await searchArchive(q);
+      lastTrackResults = results;
+      if (!results.length) { status.textContent = 'No results.'; return; }
+      status.textContent = results.length + ' result' + (results.length === 1 ? '' : 's') +
+        (trackSource === 'itunes' ? ' (30-second previews)' : ' (full-length CC/public-domain)');
+      renderTrackList(results);
+    } catch (err) {
+      status.textContent = (trackSource === 'itunes' ? 'iTunes' : 'Internet Archive') +
+        ' unreachable from this network. Error: ' + (err && err.message ? err.message : 'unknown');
+    }
+  }
+
+  function trackPlayAll() {
+    if (!lastTrackResults.length) return;
+    queue = lastTrackResults.slice();
+    queueIndex = 0;
+    playEntry(queue[0]);
+    setStatus('Playing ' + queue.length + ' tracks.');
+  }
+
   // ---------- Search (radio-browser) ------------------------------------
   async function runSearch() {
     const q = (document.getElementById('searchInput').value || '').trim();
@@ -355,6 +529,21 @@
   document.getElementById('searchBtn').addEventListener('click', runSearch);
   document.getElementById('searchInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') runSearch(); });
 
+  // Track-search wiring
+  document.getElementById('trackSearchBtn').addEventListener('click', runTrackSearch);
+  document.getElementById('trackSearchInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') runTrackSearch(); });
+  document.getElementById('trackPlayAllBtn').addEventListener('click', trackPlayAll);
+  document.querySelectorAll('.src-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('.src-btn').forEach(x => x.classList.toggle('active', x === b));
+      trackSource = b.getAttribute('data-source') || 'itunes';
+      const input = document.getElementById('trackSearchInput');
+      input.placeholder = trackSource === 'itunes'
+        ? 'Artist, song, album...'
+        : 'Keywords (e.g. "jazz 1950", "netlabel ambient")...';
+    });
+  });
+
   // ---------- keyboard shortcuts ----------------------------------------
   document.addEventListener('keydown', (e) => {
     const t = e.target;
@@ -385,5 +574,6 @@
   renderRadioList();
   renderLocalList();
   renderUrlList();
+  renderTrackList([]);     // Shows favorites (if any) or an empty-state hint.
   updateMuteBtn();
 })();

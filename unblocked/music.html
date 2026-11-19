@@ -34,14 +34,33 @@
   <div class="music-layout">
     <section class="music-browser">
       <div class="tabbar" role="tablist">
-        <button class="tab-btn active" data-tab="radio" role="tab">Radio</button>
-        <button class="tab-btn" data-tab="local" role="tab">Local</button>
-        <button class="tab-btn" data-tab="url"   role="tab">By URL</button>
-        <button class="tab-btn" data-tab="search" role="tab">Search</button>
+        <button class="tab-btn active" data-tab="radio"  role="tab">Radio</button>
+        <button class="tab-btn" data-tab="tracks" role="tab">Tracks</button>
+        <button class="tab-btn" data-tab="local"  role="tab">Local</button>
+        <button class="tab-btn" data-tab="url"    role="tab">By URL</button>
+        <button class="tab-btn" data-tab="search" role="tab">Radio search</button>
       </div>
 
       <div class="tab-panel active" data-panel="radio">
         <div id="radioList"></div>
+      </div>
+
+      <div class="tab-panel" data-panel="tracks">
+        <p class="muted">
+          Search real music. <b>iTunes</b> returns 30-second previews of commercial songs (every artist on the iTunes Store, with artwork).
+          <b>Archive</b> returns full-length Creative-Commons / public-domain tracks from archive.org.
+        </p>
+        <div class="source-toggle" role="tablist">
+          <button class="src-btn active" data-source="itunes" role="tab">iTunes previews (30s)</button>
+          <button class="src-btn"        data-source="archive" role="tab">Internet Archive (full CC)</button>
+        </div>
+        <div class="url-row">
+          <input id="trackSearchInput" type="search" placeholder="Artist, song, album..." />
+          <button id="trackSearchBtn">Search</button>
+          <button id="trackPlayAllBtn" title="Queue every result and play the first">Play all</button>
+        </div>
+        <p id="trackSearchStatus" class="muted" style="margin:10px 0 0"></p>
+        <div id="trackSearchList" class="track-search-list"></div>
       </div>
 
       <div class="tab-panel" data-panel="local">
