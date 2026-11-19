@@ -6,6 +6,20 @@
 <title>Study Hub</title>
 <link id="favicon" rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%232563eb'/%3E%3Ctext x='32' y='44' font-family='Arial' font-size='40' font-weight='bold' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E" />
 <link rel="stylesheet" href="styles.css" />
+<style>
+  /* Homepage-local tweaks that don't belong in the shared stylesheet. */
+  .row { margin-top: 28px; }
+  .row-title { font-size: 18px; margin: 0 0 10px; color: var(--fg); }
+  .nav-links { display: flex; gap: 10px; align-items: center; }
+  .nav-links a {
+    color: var(--fg); text-decoration: none; padding: 6px 10px;
+    border-radius: 8px; border: 1px solid transparent; font-size: 13px;
+  }
+  .nav-links a:hover { border-color: var(--accent); }
+  .nav-links a.active { background: var(--panel); border-color: #262e58; }
+  .hero-sub { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  #emptyState { color: var(--muted); font-size: 14px; padding: 12px 0; }
+</style>
 </head>
 <body>
 <header class="topbar">
@@ -16,7 +30,13 @@
   <div class="search-wrap">
     <input id="search" type="search" placeholder="Search games..." autocomplete="off" />
   </div>
+  <nav class="nav-links" aria-label="Main">
+    <a href="index.html" class="active">Games</a>
+    <a href="music.html">Music</a>
+    <a href="settings.html">Settings</a>
+  </nav>
   <div class="actions">
+    <button id="themeBtn" title="Cycle theme (dark / light / system)">Theme</button>
     <button id="aboutBlankBtn" title="Open in about:blank (hides URL from history)">about:blank</button>
     <div class="cloak">
       <label for="cloakSel">Tab:</label>
@@ -27,6 +47,8 @@
         <option value="drive">Google Drive</option>
         <option value="khan">Khan Academy</option>
         <option value="canvas">Canvas</option>
+        <option value="schoology">Schoology</option>
+        <option value="powerschool">PowerSchool</option>
         <option value="wiki">Wikipedia</option>
       </select>
     </div>
@@ -36,26 +58,42 @@
 
 <main>
   <section class="hero">
-    <h1>Pick something to play</h1>
-    <p class="muted">All games run locally in your browser. No sign-in. No external requests.</p>
+    <div class="hero-sub">
+      <div>
+        <h1>Pick something to play</h1>
+        <p class="muted">All games run locally in your browser. No sign-in. Press <kbd>?</kbd> for shortcuts.</p>
+      </div>
+    </div>
   </section>
 
-  <section id="grid" class="grid"></section>
-
-  <section class="tips">
-    <h2>Shortcuts</h2>
-    <ul>
-      <li><kbd>`</kbd> — panic: jumps to google.com</li>
-      <li><kbd>/</kbd> — focus search</li>
-      <li><kbd>Esc</kbd> — leave a game</li>
-    </ul>
+  <section id="favoritesSection" class="row" style="display:none">
+    <h2 class="row-title">Favorites</h2>
+    <div class="grid"></div>
   </section>
+
+  <section id="recentSection" class="row" style="display:none">
+    <h2 class="row-title">Recently played</h2>
+    <div class="grid"></div>
+  </section>
+
+  <div id="categorySections"></div>
+
+  <p id="emptyState" style="display:none">Nothing matches that search.</p>
 </main>
 
 <footer>
-  <span class="muted">Local-only. No tracking.</span>
+  <span class="muted">Local-only. No tracking. Vendored games retain their upstream licenses.</span>
 </footer>
 
+<script src="games.js"></script>
 <script src="main.js"></script>
+<script>
+  // Extra service-worker registration from this page (main.js also does it).
+  try {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js', { scope: './' }).catch(function(){});
+    }
+  } catch (e) {}
+</script>
 </body>
 </html>

@@ -1,0 +1,1 @@
+{ "name": "Lights Out", "slug": "lights-out", "repo_url": "https://github.com/sepandhaghighi/lightsout", "license": "MIT", "entry_file": "index.html", "controls": "Click a cell to toggle it and its orthogonal neighbors", "category": "puzzle" }

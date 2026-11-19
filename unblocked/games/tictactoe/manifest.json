@@ -1,0 +1,1 @@
+{ "name": "Tic Tac Toe", "slug": "tictactoe", "repo_url": "https://github.com/92181/tictactoe", "license": "MIT", "entry_file": "index.html", "controls": "Click a square", "category": "board" }

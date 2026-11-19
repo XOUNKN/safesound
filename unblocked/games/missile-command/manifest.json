@@ -1,0 +1,1 @@
+{ "name": "Missile Command", "slug": "missile-command", "repo_url": "https://github.com/andymason/Missile-Command-JavaScript-Clone", "license": "MIT", "entry_file": "index.html", "controls": "Mouse: click to aim and fire", "category": "arcade" }

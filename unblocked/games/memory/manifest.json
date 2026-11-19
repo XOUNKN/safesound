@@ -1,0 +1,1 @@
+{ "name": "Memory Match", "slug": "memory", "repo_url": "https://github.com/taniarascia/memory", "license": "MIT", "entry_file": "index.html", "controls": "Click cards to flip, match pairs", "category": "puzzle" }

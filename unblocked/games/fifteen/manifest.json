@@ -1,0 +1,1 @@
+{ "name": "15 Puzzle", "slug": "fifteen", "repo_url": "https://github.com/Kirilllive/Fifteen_puzzle_maker", "license": "MIT", "entry_file": "index.html", "controls": "Keyboard/mouse: click or drag tiles to slide", "category": "puzzle" }

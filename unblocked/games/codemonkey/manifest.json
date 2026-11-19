@@ -1,0 +1,1 @@
+{ "name": "Codemonkey", "slug": "codemonkey", "repo_url": "https://github.com/fizzexual/Codemonkey", "license": "MIT", "entry_file": "index.html", "controls": "Type to start, Tab+Enter restart", "category": "word" }

@@ -1,0 +1,1 @@
+{ "name": "Hangman", "slug": "hangman", "repo_url": "https://github.com/apache2op/HangmanJS", "license": "MIT", "entry_file": "index.html", "controls": "Click letter buttons or type A-Z", "category": "word" }

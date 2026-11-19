@@ -1,0 +1,1 @@
+{ "name": "Frogger", "slug": "frogger", "repo_url": "https://github.com/brianquach/html5-frogger-clone", "license": "MIT", "entry_file": "index.html", "controls": "Arrows to move", "category": "arcade" }

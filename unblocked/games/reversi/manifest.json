@@ -1,0 +1,1 @@
+{ "name": "Reversi", "slug": "reversi", "repo_url": "https://github.com/alex-berson/reversi", "license": "MIT", "entry_file": "index.html", "controls": "Click a legal square to place a disc", "category": "board" }
