@@ -165,10 +165,12 @@
   // ---------- Modal player --------------------------------------------
   const overlay = document.getElementById('playerOverlay');
   const video = document.getElementById('playerVideo');
+  const frame = document.getElementById('playerFrame');
   const titleEl = document.getElementById('playerTitle');
   const metaEl = document.getElementById('playerMeta');
   const descEl = document.getElementById('playerDesc');
   let currentMovie = null;
+  let currentMode = 'video'; // 'video' or 'iframe'
 
   function ensureFavButton() {
     const bar = document.querySelector('.player-topbar');
@@ -184,11 +186,23 @@
   }
   function updateFavoriteButton() {
     const b = ensureFavButton();
-    if (!currentMovie) { b.style.display = 'none'; return; }
+    if (!currentMovie || currentMode === 'iframe') { b.style.display = 'none'; return; }
     b.style.display = '';
     const on = isFavorite(currentMovie.id);
     b.textContent = on ? '♥ Unfavorite' : '♡ Favorite';
     b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+
+  function setPlayerMode(mode) {
+    currentMode = mode;
+    if (mode === 'iframe') {
+      video.style.display = 'none';
+      frame.style.display = '';
+    } else {
+      frame.style.display = 'none';
+      frame.src = 'about:blank';
+      video.style.display = '';
+    }
   }
 
   async function openPlayer(m, preResolved) {
@@ -198,6 +212,7 @@
     titleEl.textContent = m.title || m.id;
     metaEl.textContent = [m.creator, m.year].filter(Boolean).join(' · ');
     descEl.textContent = stripTags(m.description || '').slice(0, 480);
+    setPlayerMode('video');
     video.pause();
     video.removeAttribute('src');
     video.load();
@@ -234,13 +249,107 @@
     overlay.setAttribute('aria-hidden', 'true');
     try { video.pause(); } catch {}
     try { video.removeAttribute('src'); video.load(); } catch {}
+    // Kill the iframe too, otherwise the player keeps running audio in the background.
+    try { frame.src = 'about:blank'; } catch {}
+    setPlayerMode('video');
     currentMovie = null;
     playerStatus('');
   }
 
+  // ---------- Stream by ID (vidsrc) -----------------------------------
+  const VIDSRC_BASE = 'https://vidsrc.su/movie/';
+  const BYID_RECENT_KEY = 'byidRecent';
+
+  function normalizeMovieId(raw) {
+    if (!raw) return null;
+    const s = String(raw).trim();
+    // Full TMDB URL: https://www.themoviedb.org/movie/299534-avengers-endgame
+    const tmdbUrl = s.match(/themoviedb\.org\/movie\/(\d+)/i);
+    if (tmdbUrl) return { id: tmdbUrl[1], kind: 'tmdb' };
+    // Full IMDb URL: https://www.imdb.com/title/tt4154796/
+    const imdbUrl = s.match(/imdb\.com\/title\/(tt\d+)/i);
+    if (imdbUrl) return { id: imdbUrl[1], kind: 'imdb' };
+    // Bare IMDb ID
+    if (/^tt\d{5,}$/i.test(s)) return { id: s.toLowerCase(), kind: 'imdb' };
+    // Bare TMDB numeric
+    if (/^\d{1,8}$/.test(s)) return { id: s, kind: 'tmdb' };
+    return null;
+  }
+
+  function vidsrcUrl(id) {
+    const params = new URLSearchParams({
+      autoplay: 'true',
+      colour: '4f8dff',
+      backbutton: window.location.href.split('#')[0],
+    });
+    return VIDSRC_BASE + encodeURIComponent(id) + '?' + params.toString();
+  }
+
+  function openById(parsed) {
+    currentMovie = { id: 'external:' + parsed.id, title: parsed.kind.toUpperCase() + ' ' + parsed.id,
+                     creator: 'vidsrc.su', year: '', description: 'External embed. Streams via vidsrc.su.', poster: '' };
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+    titleEl.textContent = (parsed.kind === 'imdb' ? 'IMDb ' : 'TMDB ') + parsed.id;
+    metaEl.textContent = 'vidsrc.su';
+    descEl.textContent = 'Third-party embed. First tap may open a popup — allow or block as you prefer.';
+    setPlayerMode('iframe');
+    frame.src = vidsrcUrl(parsed.id);
+    playerStatus('');
+    updateFavoriteButton();
+    rememberById(parsed);
+    renderByIdRecent();
+  }
+
+  function rememberById(parsed) {
+    const list = LS.getJSON(BYID_RECENT_KEY, []);
+    const key = parsed.kind + ':' + parsed.id;
+    const existing = list.findIndex(e => (e.kind + ':' + e.id) === key);
+    if (existing !== -1) list.splice(existing, 1);
+    list.unshift({ id: parsed.id, kind: parsed.kind, at: null });
+    if (list.length > 12) list.length = 12;
+    LS.setJSON(BYID_RECENT_KEY, list);
+  }
+
+  function renderByIdRecent() {
+    const section = document.getElementById('byidRecentSection');
+    const grid = document.getElementById('byidRecentGrid');
+    if (!section || !grid) return;
+    const list = LS.getJSON(BYID_RECENT_KEY, []);
+    if (!list.length) { section.style.display = 'none'; return; }
+    section.style.display = '';
+    grid.innerHTML = '';
+    list.forEach(e => {
+      const card = document.createElement('div');
+      card.className = 'movie-card';
+      card.innerHTML =
+        '<div class="movie-poster"><span class="poster-fallback">&#9835;</span></div>' +
+        '<div class="movie-meta">' +
+          '<p class="movie-title">' + escapeHtml((e.kind === 'imdb' ? 'IMDb ' : 'TMDB ') + e.id) + '</p>' +
+          '<div class="movie-sub"><span>vidsrc.su</span></div>' +
+        '</div>';
+      card.addEventListener('click', () => openById(e));
+      grid.appendChild(card);
+    });
+  }
+
+  function runByIdWatch() {
+    const input = document.getElementById('byidInput');
+    const status = document.getElementById('byidStatus');
+    const parsed = normalizeMovieId(input.value);
+    if (!parsed) {
+      status.textContent = 'Not a recognized ID. Expected a TMDB number (299534) or IMDb tt-ID (tt4154796), or a full URL from either site.';
+      return;
+    }
+    status.textContent = 'Opening ' + parsed.kind.toUpperCase() + ' ' + parsed.id + '...';
+    openById(parsed);
+    status.textContent = '';
+  }
+
   document.getElementById('playerClose').addEventListener('click', closePlayer);
   document.getElementById('playerFullscreen').addEventListener('click', () => {
-    if (!document.fullscreenElement) video.requestFullscreen && video.requestFullscreen();
+    const el = currentMode === 'iframe' ? frame : video;
+    if (!document.fullscreenElement) el.requestFullscreen && el.requestFullscreen();
     else document.exitFullscreen && document.exitFullscreen();
   });
   overlay.addEventListener('click', (e) => { if (e.target === overlay) closePlayer(); });
@@ -277,6 +386,9 @@
     const coll = document.getElementById('movieCollection').value;
     loadFeatured(coll);
   });
+
+  document.getElementById('byidWatchBtn').addEventListener('click', runByIdWatch);
+  document.getElementById('byidInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') runByIdWatch(); });
 
   // ---------- Local files ---------------------------------------------
   const localFiles = []; // { name, url (object url), duration? }
@@ -336,6 +448,14 @@
     if (overlay.classList.contains('open')) {
       if (e.key === 'Escape') { e.preventDefault(); closePlayer(); return; }
       if (typing) return;
+      // Iframe-mode players have their own key handlers inside the frame; don't try to drive the hidden <video>.
+      if (currentMode === 'iframe') {
+        if (e.key === 'f' || e.key === 'F') {
+          if (!document.fullscreenElement) frame.requestFullscreen && frame.requestFullscreen();
+          else document.exitFullscreen && document.exitFullscreen();
+        }
+        return;
+      }
       if (e.key === ' ' || e.code === 'Space') {
         e.preventDefault();
         if (video.paused) video.play().catch(() => {}); else video.pause();
@@ -352,4 +472,5 @@
   renderFavorites();
   loadFeatured('feature_films');
   renderLocal();
+  renderByIdRecent();
 })();

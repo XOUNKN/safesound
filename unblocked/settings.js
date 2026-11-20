@@ -54,6 +54,7 @@
   const OWN_KEYS = [
     'cloak', 'theme', 'panicUrl', 'favorites', 'recent',
     'favoriteStations', 'volume', 'lastPlayed',
+    'favoriteMovies', 'favoriteTracks', 'byidRecent',
   ];
   if (clearBtn) clearBtn.addEventListener('click', () => {
     if (!confirm('Clear all Study Hub data saved in this browser?')) return;

@@ -176,6 +176,7 @@
 
   <div class="movie-tabbar" role="tablist">
     <button class="movie-tab-btn active" data-panel="browse" role="tab">Browse</button>
+    <button class="movie-tab-btn" data-panel="byid"  role="tab">By ID</button>
     <button class="movie-tab-btn" data-panel="local" role="tab">Local file</button>
   </div>
 
@@ -211,6 +212,24 @@
     </section>
   </div>
 
+  <div class="movie-panel" data-panel="byid">
+    <p class="muted" style="margin:0 0 6px">
+      Paste a <b>TMDB</b> numeric ID (e.g. <code>299534</code> = Avengers: Endgame) or an <b>IMDb</b> ID (e.g. <code>tt4154796</code>). Streams via vidsrc.su.
+    </p>
+    <p class="muted" style="margin:0 0 6px;font-size:12px">
+      Find IDs on themoviedb.org or imdb.com. The ID is in the URL of any movie page.
+    </p>
+    <div class="search-bar">
+      <input id="byidInput" type="text" placeholder="299534  or  tt4154796" autocomplete="off" spellcheck="false" />
+      <button id="byidWatchBtn">Watch</button>
+    </div>
+    <p id="byidStatus" class="status-line"></p>
+    <section class="row-section" id="byidRecentSection" style="display:none">
+      <h2 style="font-size:14px;color:var(--muted);font-weight:500">Recently watched by ID</h2>
+      <div id="byidRecentGrid" class="movies-grid"></div>
+    </section>
+  </div>
+
   <div class="movie-panel" data-panel="local">
     <p class="muted" style="margin:0 0 6px">Drop a video file here to watch it in this page. Nothing is uploaded; the file stays on your device.</p>
     <div id="localMovieDrop" class="movies-local-dropzone">
@@ -234,6 +253,12 @@
     </div>
     <div class="player-video-wrap">
       <video id="playerVideo" controls playsinline preload="metadata"></video>
+      <iframe id="playerFrame"
+              style="display:none;width:100%;height:100%;border:0;background:#000"
+              allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+              allowfullscreen
+              referrerpolicy="no-referrer"
+              title="External embed"></iframe>
     </div>
     <div class="player-body">
       <div class="pb-meta" id="playerMeta"></div>
