@@ -252,9 +252,8 @@ const newGame = () => {
     }, 1500 + 600 * 4 + 500);
 }
 
-const registerServiceWorker = () => {
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js');
-}
+// Upstream registers its own service-worker.js; it is not shipped here because the hub's sw.js already covers this path.
+const registerServiceWorker = () => {}
 
 const init = () => {
     registerServiceWorker();

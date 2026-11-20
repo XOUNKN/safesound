@@ -2,7 +2,7 @@
 // Strategy: cache-first for same-origin, network-first for cross-origin.
 // Takes over immediately on install/activate.
 
-const VERSION = 'studyhub-v2';
+const VERSION = 'studyhub-v3';
 const SHELL = [
   './',
   'index.html',

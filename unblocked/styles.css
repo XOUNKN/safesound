@@ -50,6 +50,14 @@ kbd {
 }
 .brand-name { font-weight: 600; }
 
+.nav-links { display: flex; gap: 10px; align-items: center; }
+.nav-links a {
+  color: var(--fg); text-decoration: none; padding: 6px 10px;
+  border-radius: 8px; border: 1px solid transparent; font-size: 13px;
+}
+.nav-links a:hover { border-color: var(--accent); }
+.nav-links a.active { background: var(--panel); border-color: #262e58; }
+
 .search-wrap { flex: 1; display: flex; }
 #search {
   flex: 1;
