@@ -2,16 +2,18 @@
 // Strategy: cache-first for same-origin, network-first for cross-origin.
 // Takes over immediately on install/activate.
 
-const VERSION = 'studyhub-v1';
+const VERSION = 'studyhub-v2';
 const SHELL = [
   './',
   'index.html',
   'music.html',
+  'movies.html',
   'settings.html',
   'styles.css',
   'games.js',
   'main.js',
   'music.js',
+  'movies.js',
   'settings.js',
   'cloak-inherit.js',
 ];
