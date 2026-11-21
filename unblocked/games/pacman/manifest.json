@@ -1,0 +1,1 @@
+{ "name": "Pac-Man", "slug": "pacman", "repo_url": "https://github.com/nethan-k/pacman", "license": "MIT", "entry_file": "index.html", "controls": "Enter to insert coin, arrows to move", "category": "arcade" }

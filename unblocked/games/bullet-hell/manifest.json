@@ -1,0 +1,1 @@
+{ "name": "Bullet Hell", "slug": "bullet-hell", "repo_url": "https://github.com/selenebun/bullethell", "license": "MIT", "entry_file": "index.html", "controls": "Arrows/WASD move, Z/Space fire, Shift focus", "category": "shmup" }

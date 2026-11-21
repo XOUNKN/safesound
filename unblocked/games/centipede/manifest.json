@@ -1,0 +1,1 @@
+{ "name": "Centipede", "slug": "centipede", "repo_url": "https://github.com/PerpetualBeta/Centipede", "license": "Unlicense", "entry_file": "index.html", "controls": "Arrows/WASD move, Space fire, P or Esc pause", "category": "arcade" }

@@ -1,0 +1,1 @@
+{ "name": "Asteroids", "slug": "asteroids", "repo_url": "https://github.com/dmcinnes/HTML5-Asteroids", "license": "MIT", "entry_file": "index.html", "controls": "Arrows turn/thrust, Space fires", "category": "arcade" }

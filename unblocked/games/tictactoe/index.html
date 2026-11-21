@@ -1,0 +1,331 @@
+<!doctype html><html>
+<head>
+  <title>Tic-Tac-Toe - Online</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel='icon' href=""></link>
+  <style> 
+    @font-face{font-family: 'Ubuntu'; src: url('ubuntu.woff2')}
+    body {
+      display: flex;
+      font-family: 'Ubuntu';
+      justify-content: center;
+      align-items: center;
+      background: #000;
+      color: #fff;
+      height: 100vh;
+      margin: 0;
+    }
+    canvas {
+      width: 30rem;
+      height: 30rem;
+      margin-bottom: 1.2rem;
+      @media (max-width: 570px) {
+        width: 18rem;
+        height: 18rem;
+      }
+    }
+    #res {
+      display: flex;
+      justify-content: center;
+      gap: 1.8rem;
+      & > div {
+        display: flex;
+        user-select: none;
+        flex-direction: column;
+        align-items: center;
+        font-size: 1.2rem;
+        gap: 0.5rem;
+        & > span {
+          font-size: 2.4rem;
+        }
+        @media (max-width: 570px) {
+          font-size: 1rem;
+          & > span {
+            font-size: 1.8rem;
+          }
+        }
+      }
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <canvas></canvas>
+    <div id="res">
+      <div onclick="Ys=Ya=0;yr();res()">Player (X)<span>0</span></div>
+      <div onclick="res();yt()">Versus<span>1P</span></div>
+      <div onclick="Ys=Ya=0;yr();res()">Player (O)<span>0</span></div>
+    </div>
+  </div>
+<script>
+// Set Favicon;
+qq='M23 55Q27 63 36 68 33 61 35 58C37 64 41 63 43 68 46 63 38 56 41 50 44 44 68 49 68 39 68 35 52 34 49 24Q39 16 44 4 41 5 39 7 39 4 37 0 30 7 25 17 13 16 7 21 13 20 16 21 3 25 0 37 5 32 9 31 3 43 9 55 9 46 12 42 13 54 27 67 22 58 23 55M37 18Q33 17 30 18 32 11 36 7 37 11 37 18M40 25Q46 27 48 31 41 30 40 25';
+document.querySelector("link").href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 68 68'%3E%3Cpath d='"+qq+"' fill='%23fff'/%3E%3C/svg%3E";
+
+// Define Variables;
+let z=[0,0,0,0,0,0,0,0,0],kr=1,ye=1,Ya=0,Ys=0;
+
+let p=document.querySelector("canvas"),c1=p.getContext("2d"),rh=window.devicePixelRatio,b=document.querySelectorAll("span");
+
+function yr(){b[0].innerHTML=Ya;b[2].innerHTML=Ys;};function yt(){if(ye){ye=0;b[1].innerHTML="2P"}else{ye=1;b[1].innerHTML="1P"}}
+
+// Draw Circle Or Cross;
+function yo(x,y){c1.beginPath();c1.moveTo(x-ys,y-ys);c1.lineTo(x+ys,y+ys);c1.moveTo(x-ys,y+ys);c1.lineTo(x+ys,y-ys);c1.stroke()};
+function yx(x,y){c1.beginPath();c1.arc(x,y,yf/3.8,0,Math.PI*2);c1.closePath();c1.stroke()};
+
+// Handle Resizing;
+function f0()
+{
+  p.width=p.height="";dw=p.offsetWidth;p.width=dw*rh;p.height=p.offsetHeight*rh;
+
+  c1.clearRect(0,0,p.width,p.height);
+  yy();
+};
+
+window.onresize=f0;f0();
+
+// Calculate Dimensions & Init;
+function yy()
+{
+  yf=dw*rh/3,ys=yf/4,yg=yf*2,yh=yg+yf,yj=9,yv=dw*rh/6,yn=yv*3+1.5*3,Yq=yv*5+yj;
+
+  c1.fillStyle=c1.strokeStyle='#fff';c1.lineWidth=yf/12.5;c1.lineCap='round';
+
+  res();
+};
+
+let n=yh-yg,q,c;
+
+function yu(){c1.clearRect(0,0,yh,yh);c1.fillRect(0,yf,yh,yj);c1.fillRect(0,yg,yh,yj);c1.fillRect(yf,0,yj,yh);c1.fillRect(yg,0,yj,yh)};
+
+// Reset Game;
+function res()
+{
+  Yp=Yf=0;yu();kr=1;z=[0,0,0,0,0,0,0,0,0];Yf=0;
+
+  if(ye&&Ys)
+  {
+    dtc();
+  };
+};
+
+// Process Win;
+function yp()
+{
+  if(kr==2)
+  {
+    Ya+=1;yr();
+  }
+  else
+  {
+    Ys+=1;yr();
+  };
+};
+
+// Detect Win;
+function win(i,p)
+{
+  switch(i)
+  {
+    case 0:
+    {
+      if(z[1]==p&&z[2]==p||z[3]==p&&z[6]==p||z[4]==p&&z[8]==p)
+      {
+        return 1;
+      };
+      break;
+    }
+    case 1:
+    {
+      if(z[0]==p&&z[2]==p||z[4]==p&&z[7]==p)
+      {
+        return 1;
+      };
+      break;
+    }
+    case 2:
+    {
+      if(z[0]==p&&z[1]==p||z[5]==p&&z[8]==p||z[4]==p&&z[6]==p)
+      {
+        return 1;
+      };
+      break;
+    }
+    case 3:
+    {
+      if(z[4]==p&&z[7]==p||z[0]==p&&z[6]==p)
+      {
+        return 1;
+      };
+      break;
+    }
+    case 4:
+    {
+      if(z[3]==p&&z[5]==p||z[1]==p&&z[7]==p||z[2]==p&&z[6]==p||z[0]==p&&z[8]==p)
+      {
+        return 1;
+      };
+      break;
+    }
+    case 5:
+    {
+      if(z[2]==p&&z[8]==p||z[3]==p&&z[4]==p)
+      {
+        return 1;
+      };
+      break;
+    }
+    case 6:
+    {
+      if(z[2]==p&&z[4]==p||z[0]==p&&z[3]==p||z[7]==p&&z[8]==p)
+      {
+        return 1;
+      };
+      break;
+    }
+    case 7:
+    {
+      if(z[1]==p&&z[4]==p||z[6]==p&&z[8]==p)
+      {
+        return 1;
+      };
+      break;
+    }
+    case 8:
+    {
+      if(z[6]==p&&z[7]==p||z[2]==p&&z[5]==p||z[0]==p&&z[4]==p)
+      {
+        return 1;
+      };
+      break;
+    }
+  };
+
+  return 0;
+};
+
+// Get Drawing Position;
+function gdw(v,k)
+{
+  if(v==2){q=Yq;}else if(v){q=yn;}else{q=yv;};
+  if(k==2){c=Yq;}else if(k){c=yn;}else{c=yv;};
+
+  // Draw Move;
+  if(kr==2)
+  {
+    yo(q,c);kr=1;
+  }
+  else
+  {
+    yx(q,c);kr=2;
+  };
+};
+
+// Handle Computer Player;
+function dtc()
+{
+  // Check Situation;
+  let i=0;
+
+  if(Yf>2)
+  {
+    while(i<9)
+    {
+      if(z[i]==0)
+      {
+        // Detect Win;
+        if(win(i,2))
+        {
+          // Set And Draw;
+          z[i]=kr;Yf=9;yp();gdw(i%3,i/3|0);
+
+          return;
+        };
+      };
+
+      i+=1;
+    };
+
+    i=0;
+
+    while(i<9)
+    {
+      if(z[i]==0)
+      {
+        // Prevent Possible Loss;
+        if(win(i,1))
+        {
+          // Set And Draw;
+          z[i]=kr;Yf+=1;gdw(i%3,i/3|0);
+
+          return;
+        };
+      };
+
+      i+=1;
+    }
+  };
+
+  // Random Position;
+  let j=0,t=(Math.random()*(9-Yf))|0;
+  
+  i=0;
+
+  while(i<9)
+  {
+    if(z[i]==0)
+    {
+      if(j==t)
+      {
+        // Set And Draw;
+        z[i]=kr;Yf+=1;gdw(i%3,i/3|0);
+
+        break;
+      };
+
+      j+=1;
+    };
+    
+    i+=1;
+  };
+};
+
+p.onclick=function(e)
+{
+  x=e.offsetX*rh;y=e.offsetY*rh;
+  
+  if(Yf!=9)
+  {
+    // Calculate Box Index;
+    let v=x/n|0,k=y/n|0,b=k*3+v;
+
+    if(z[b]==0)
+    {
+      z[b]=kr;
+
+      // Check For Win;
+      if(win(b,kr))
+      {
+        yp();Yf=9;gdw(v,k);
+      }
+      else
+      {
+        gdw(v,k);Yf+=1;
+
+        // Computer Player;
+        if(ye&&Yf!=9)
+        {
+          dtc();
+        };
+      };
+    };
+  }
+  else
+  {
+    // Reset;
+    res();
+  };
+};
+</script>
+</body>
+</html>

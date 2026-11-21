@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Blocks</title>
+<link id="favicon" rel="icon" href="" />
+<link rel="stylesheet" href="../styles.css" />
+</head>
+<body class="game">
+<div class="game-wrap">
+  <div class="game-bar">
+    <a href="../index.html">&larr; Back</a>
+    <span id="score">0 &middot; Lv 1 &middot; Best 0</span>
+  </div>
+  <div class="game-canvas-wrap">
+    <canvas id="c" width="300" height="600"></canvas>
+    <div id="over" class="overlay" hidden><span id="overText">Press Space</span></div>
+  </div>
+  <div class="game-hint">Arrows move, Up rotates, Space drops, P pause.</div>
+</div>
+<script src="../cloak-inherit.js"></script>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const COLS=10, ROWS=20, SZ=30;
+const BEST_KEY='tetris.best';
+const SHAPES = {
+  I: [[1,1,1,1]],
+  O: [[2,2],[2,2]],
+  T: [[0,3,0],[3,3,3]],
+  S: [[0,4,4],[4,4,0]],
+  Z: [[5,5,0],[0,5,5]],
+  J: [[6,0,0],[6,6,6]],
+  L: [[0,0,7],[7,7,7]],
+};
+const COLORS = ['#000','#06b6d4','#eab308','#a855f7','#22c55e','#ef4444','#3b82f6','#f97316'];
+
+let grid, piece, score, lines, level, best, dead, paused, timer, dropMs;
+
+function newPiece() {
+  const keys = Object.keys(SHAPES);
+  const k = keys[Math.floor(Math.random()*keys.length)];
+  const m = SHAPES[k].map(r => r.slice());
+  return { m, r: 0, c: Math.floor((COLS-m[0].length)/2) };
+}
+function reset() {
+  grid = Array.from({length:ROWS}, () => Array(COLS).fill(0));
+  piece = newPiece();
+  score = 0; lines = 0; level = 1; dead = false; paused = false; dropMs = 500;
+  best = Number(localStorage.getItem(BEST_KEY) || 0);
+  updateScore();
+  clearInterval(timer);
+  timer = setInterval(tick, dropMs);
+  hideOverlay();
+  draw();
+}
+function updateScore() {
+  document.getElementById('score').textContent = `${score} · Lv ${level} · Best ${best}`;
+}
+function collides(m, r, c) {
+  for (let i=0;i<m.length;i++) for (let j=0;j<m[0].length;j++) {
+    if (!m[i][j]) continue;
+    const rr=r+i, cc=c+j;
+    if (cc<0||cc>=COLS||rr>=ROWS) return true;
+    if (rr>=0 && grid[rr][cc]) return true;
+  }
+  return false;
+}
+function merge() {
+  for (let i=0;i<piece.m.length;i++) for (let j=0;j<piece.m[0].length;j++) {
+    if (piece.m[i][j]) {
+      const rr=piece.r+i, cc=piece.c+j;
+      if (rr<0) { die(); return; }
+      grid[rr][cc] = piece.m[i][j];
+    }
+  }
+  let cleared = 0;
+  for (let r=ROWS-1;r>=0;r--) {
+    if (grid[r].every(v=>v)) {
+      grid.splice(r,1); grid.unshift(Array(COLS).fill(0));
+      cleared++; r++;
+    }
+  }
+  if (cleared) {
+    const pts = [0,100,300,500,800][cleared] || 0;
+    score += pts * level;
+    lines += cleared;
+    const newLevel = 1 + Math.floor(lines/10);
+    if (newLevel !== level) {
+      level = newLevel;
+      dropMs = Math.max(80, 500 - (level-1)*40);
+      clearInterval(timer); timer = setInterval(tick, dropMs);
+    }
+    if (score > best) { best = score; localStorage.setItem(BEST_KEY, best); }
+    updateScore();
+  }
+  piece = newPiece();
+  if (collides(piece.m, piece.r, piece.c)) die();
+}
+function tick() {
+  if (paused||dead) return;
+  if (!collides(piece.m, piece.r+1, piece.c)) piece.r++;
+  else merge();
+  draw();
+}
+function rotate(m) {
+  const h=m.length, w=m[0].length;
+  const r = Array.from({length:w}, () => Array(h).fill(0));
+  for (let i=0;i<h;i++) for (let j=0;j<w;j++) r[j][h-1-i] = m[i][j];
+  return r;
+}
+function hardDrop() {
+  while (!collides(piece.m, piece.r+1, piece.c)) { piece.r++; score++; }
+  merge(); updateScore(); draw();
+}
+function die() { dead = true; clearInterval(timer); showOverlay('Game over. Space to restart.'); }
+function draw() {
+  ctx.fillStyle = '#0a0f1d'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  for (let r=0;r<ROWS;r++) for (let c=0;c<COLS;c++) {
+    if (grid[r][c]) drawCell(c, r, grid[r][c]);
+  }
+  for (let i=0;i<piece.m.length;i++) for (let j=0;j<piece.m[0].length;j++) {
+    if (piece.m[i][j]) drawCell(piece.c+j, piece.r+i, piece.m[i][j]);
+  }
+}
+function drawCell(c, r, v) {
+  ctx.fillStyle = COLORS[v] || '#fff';
+  ctx.fillRect(c*SZ+1, r*SZ+1, SZ-2, SZ-2);
+}
+function showOverlay(t) { const o=document.getElementById('over'); document.getElementById('overText').textContent=t; o.hidden=false; }
+function hideOverlay() { document.getElementById('over').hidden = true; }
+
+document.addEventListener('keydown', (e) => {
+  if (dead) { if (e.key===' ') reset(); return; }
+  if (paused) { if (e.key.toLowerCase()==='p') { paused=false; hideOverlay(); } return; }
+  switch(e.key) {
+    case 'ArrowLeft':  if (!collides(piece.m, piece.r, piece.c-1)) piece.c--; break;
+    case 'ArrowRight': if (!collides(piece.m, piece.r, piece.c+1)) piece.c++; break;
+    case 'ArrowDown':  if (!collides(piece.m, piece.r+1, piece.c)) { piece.r++; score++; updateScore(); } break;
+    case 'ArrowUp': {
+      const rot = rotate(piece.m);
+      if (!collides(rot, piece.r, piece.c)) piece.m = rot;
+      else if (!collides(rot, piece.r, piece.c-1)) { piece.m = rot; piece.c--; }
+      else if (!collides(rot, piece.r, piece.c+1)) { piece.m = rot; piece.c++; }
+      break;
+    }
+    case ' ': hardDrop(); break;
+    case 'Escape': window.location.href='../index.html'; return;
+    default:
+      if (e.key.toLowerCase()==='p') { paused=true; showOverlay('Paused'); }
+      return;
+  }
+  e.preventDefault();
+  draw();
+});
+
+reset();
+</script>
+</body>
+</html>

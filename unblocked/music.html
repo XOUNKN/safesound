@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Study Hub</title>
+<link id="favicon" rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%232563eb'/%3E%3Ctext x='32' y='44' font-family='Arial' font-size='40' font-weight='bold' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">S</span>
+    <span class="brand-name">Study Hub</span>
+  </div>
+  <div class="search-wrap"></div>
+  <nav class="nav-links" aria-label="Main">
+    <a href="index.html">Games</a>
+    <a href="music.html" class="active">Music</a>
+    <a href="movies.html">Movies</a>
+    <a href="settings.html">Settings</a>
+  </nav>
+  <div class="actions">
+    <button id="themeBtn" title="Cycle theme">Theme</button>
+    <button id="aboutBlankBtn">about:blank</button>
+    <div class="cloak">
+      <label for="cloakSel">Tab:</label>
+      <select id="cloakSel"></select>
+    </div>
+    <button id="panicBtn" title="Panic (also: press ` key)">Panic</button>
+  </div>
+</header>
+
+<main class="music-main">
+  <div class="music-layout">
+    <section class="music-browser">
+      <div class="tabbar" role="tablist">
+        <button class="tab-btn active" data-tab="radio"  role="tab">Radio</button>
+        <button class="tab-btn" data-tab="tracks" role="tab">Tracks</button>
+        <button class="tab-btn" data-tab="local"  role="tab">Local</button>
+        <button class="tab-btn" data-tab="url"    role="tab">By URL</button>
+        <button class="tab-btn" data-tab="search" role="tab">Radio search</button>
+      </div>
+
+      <div class="tab-panel active" data-panel="radio">
+        <div id="radioList"></div>
+      </div>
+
+      <div class="tab-panel" data-panel="tracks">
+        <p class="muted">
+          Search real music. <b>iTunes</b> returns 30-second previews of commercial songs (every artist on the iTunes Store, with artwork).
+          <b>Archive</b> returns full-length Creative-Commons / public-domain tracks from archive.org.
+        </p>
+        <div class="source-toggle" role="tablist">
+          <button class="src-btn active" data-source="itunes" role="tab">iTunes previews (30s)</button>
+          <button class="src-btn"        data-source="archive" role="tab">Internet Archive (full CC)</button>
+        </div>
+        <div class="url-row">
+          <input id="trackSearchInput" type="search" placeholder="Artist, song, album..." />
+          <button id="trackSearchBtn">Search</button>
+          <button id="trackPlayAllBtn" title="Queue every result and play the first">Play all</button>
+        </div>
+        <p id="trackSearchStatus" class="muted" style="margin:10px 0 0"></p>
+        <div id="trackSearchList" class="track-search-list"></div>
+      </div>
+
+      <div class="tab-panel" data-panel="local">
+        <div id="localDrop" class="drop-zone">
+          <p>Drop audio files here, or</p>
+          <label class="file-button">
+            <input id="localFileInput" type="file" accept="audio/*" multiple hidden />
+            <span>Add tracks</span>
+          </label>
+        </div>
+        <div id="localList" class="track-list"></div>
+      </div>
+
+      <div class="tab-panel" data-panel="url">
+        <p class="muted">Add a direct stream or file URL. Must end with .mp3, .aac, .ogg, .m3u, .pls, or /stream.</p>
+        <div class="url-row">
+          <input id="urlInput" type="url" placeholder="https://example.com/stream.mp3" />
+          <button id="urlAddBtn">Add</button>
+        </div>
+        <p id="urlError" class="error-text" style="display:none"></p>
+        <div id="urlList" class="track-list"></div>
+      </div>
+
+      <div class="tab-panel" data-panel="search">
+        <p class="muted">Search the public radio-browser directory. Needs network access to that service.</p>
+        <div class="url-row">
+          <input id="searchInput" type="search" placeholder="Search station name..." />
+          <button id="searchBtn">Search</button>
+        </div>
+        <p id="searchStatus" class="muted" style="margin:10px 0 0"></p>
+        <div id="searchList"></div>
+      </div>
+    </section>
+
+    <section class="now-playing" aria-label="Now playing">
+      <div class="artwork" id="artwork"><span>&#9835;</span></div>
+      <div class="np-title" id="npTitle">Nothing playing</div>
+      <div class="np-sub" id="npSub">Pick a station or a track</div>
+
+      <div class="seek-row">
+        <span id="timeCur">0:00</span>
+        <input type="range" id="seek" min="0" max="100" value="0" step="0.1" />
+        <span id="timeTot">0:00</span>
+      </div>
+
+      <div class="player-controls">
+        <button id="prevBtn" title="Previous">&#9198;</button>
+        <button id="playBtn" class="primary" title="Play / pause">&#9654;</button>
+        <button id="nextBtn" title="Next">&#9197;</button>
+        <button id="muteBtn" title="Mute (M)">&#128266;</button>
+        <input type="range" id="volume" min="0" max="1" step="0.01" value="0.8" />
+      </div>
+
+      <p id="statusLine" class="muted" style="margin-top:12px;min-height:1em"></p>
+      <audio id="player" preload="none" crossorigin="anonymous"></audio>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <span class="muted">Streams are played directly from each station. If a stream won't load, that station is probably offline or http-only.</span>
+</footer>
+
+<script>
+// Pre-baked station list (per the hub plan — no load-time fetch).
+window.STATIONS = [
+  {"name":"MANGORADIO","stream":"https://mangoradio.stream.laut.fm/mangoradio","codec":"MP3","genre":"variety","secure":true},
+  {"name":"Dance Wave","stream":"https://dancewave.online/dance.mp3","codec":"MP3","genre":"electronic","secure":true},
+  {"name":"Radio Paradise 320k","stream":"http://stream-uk1.radioparadise.com/aac-320","codec":"AAC","genre":"eclectic","secure":false},
+  {"name":"Classic Vinyl HD","stream":"https://icecast.walmradio.com:8443/classic","codec":"MP3","genre":"classic hits","secure":true},
+  {"name":"WALM 2 HD","stream":"https://icecast.walmradio.com:8443/walm2","codec":"MP3","genre":"classical","secure":true},
+  {"name":"101 Smooth Jazz","stream":"http://jking.cdnstream1.com/b22139_128mp3","codec":"MP3","genre":"jazz","secure":false},
+  {"name":"France Info","stream":"http://icecast.radiofrance.fr/franceinfo-hifi.aac","codec":"AAC","genre":"news","secure":false},
+  {"name":"Your Classical Relax","stream":"http://relax.stream.publicradio.org/relax.mp3","codec":"MP3","genre":"classical","secure":false},
+  {"name":"Lofi 24/7","stream":"http://usa9.fastcast4u.com/proxy/jamz?mp=/1","codec":"MP3","genre":"lofi","secure":false},
+  {"name":"Nightwave Plaza","stream":"http://radio.plaza.one/opus","codec":"OGG/Opus","genre":"vaporwave","secure":false},
+  {"name":"Frisky","stream":"http://stream2.friskyradio.com/frisky_mp3_hi","codec":"MP3","genre":"house","secure":false},
+  {"name":"Intense Radio","stream":"https://secure.live-streams.nl/main","codec":"MP3","genre":"dance","secure":true},
+  {"name":"Radio Caroline","stream":"http://78.129.202.200:8040/;","codec":"MP3","genre":"classic rock","secure":false},
+  {"name":"Big R 80s Metal","stream":"http://bigrradio.cdnstream1.com/5186_128","codec":"MP3","genre":"metal","secure":false},
+  {"name":"Skyrock Klassics","stream":"https://icecast.skyrock.net/s/klassiks_aac_64k","codec":"AAC","genre":"hip-hop classics","secure":true},
+  {"name":"SomaFM Groove Salad","stream":"https://ice4.somafm.com/groovesalad-128-aac","codec":"AAC","genre":"ambient/downtempo","secure":true},
+  {"name":"SomaFM DEF CON Radio","stream":"https://ice4.somafm.com/defcon-256-mp3","codec":"MP3","genre":"electronic","secure":true},
+  {"name":"SomaFM Secret Agent","stream":"https://ice4.somafm.com/secretagent-128-aac","codec":"AAC","genre":"lounge","secure":true},
+  {"name":"SomaFM Space Station","stream":"https://ice4.somafm.com/spacestation-128-aac","codec":"AAC","genre":"ambient","secure":true},
+  {"name":"SomaFM Lush","stream":"https://ice4.somafm.com/lush-128-aac","codec":"AAC","genre":"female vocals","secure":true},
+  {"name":"SomaFM Deep Space One","stream":"https://ice4.somafm.com/deepspaceone-128-aac","codec":"AAC","genre":"space ambient","secure":true}
+];
+</script>
+<script src="main.js"></script>
+<script src="music.js"></script>
+</body>
+</html>

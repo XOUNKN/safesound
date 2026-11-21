@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Study Hub</title>
+<link id="favicon" rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%232563eb'/%3E%3Ctext x='32' y='44' font-family='Arial' font-size='40' font-weight='bold' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">S</span>
+    <span class="brand-name">Study Hub</span>
+  </div>
+  <div class="search-wrap"></div>
+  <nav class="nav-links" aria-label="Main">
+    <a href="index.html">Games</a>
+    <a href="music.html">Music</a>
+    <a href="movies.html">Movies</a>
+    <a href="settings.html" class="active">Settings</a>
+  </nav>
+  <div class="actions">
+    <button id="themeBtn" title="Cycle theme">Theme</button>
+    <button id="aboutBlankBtn">about:blank</button>
+    <div class="cloak">
+      <label for="cloakSel">Tab:</label>
+      <select id="cloakSel"></select>
+    </div>
+    <button id="panicBtn" title="Panic (also: press ` key)">Panic</button>
+  </div>
+</header>
+
+<main class="settings-main">
+  <h1>Settings</h1>
+
+  <section class="settings-card">
+    <h2>Theme</h2>
+    <p class="muted">System follows your OS preference.</p>
+    <div class="radio-row">
+      <label><input type="radio" name="theme" value="system" /> System</label>
+      <label><input type="radio" name="theme" value="dark" /> Dark</label>
+      <label><input type="radio" name="theme" value="light" /> Light</label>
+    </div>
+  </section>
+
+  <section class="settings-card">
+    <h2>Cloak preset</h2>
+    <p class="muted">Changes the browser tab's title and icon so a glance at your tab bar shows something school-friendly.</p>
+    <select id="cloakPicker"></select>
+  </section>
+
+  <section class="settings-card">
+    <h2>Panic URL</h2>
+    <p class="muted">Pressing <kbd>`</kbd> or clicking Panic jumps here. Must be http(s).</p>
+    <div class="url-row">
+      <input id="panicInput" type="url" placeholder="https://classroom.google.com" />
+      <button id="panicSave">Save</button>
+    </div>
+    <p id="panicStatus" class="muted" style="min-height:1em;margin-top:6px"></p>
+  </section>
+
+  <section class="settings-card">
+    <h2>Keyboard shortcuts</h2>
+    <ul class="shortcut-list">
+      <li><kbd>/</kbd><span>Focus search</span></li>
+      <li><kbd>?</kbd><span>Shortcuts help</span></li>
+      <li><kbd>Esc</kbd><span>Close dialogs</span></li>
+      <li><kbd>`</kbd><span>Panic</span></li>
+      <li><kbd>Space</kbd><span>Music: play/pause</span></li>
+      <li><kbd>M</kbd><span>Music: mute</span></li>
+      <li><kbd>&uarr;</kbd> / <kbd>&darr;</kbd><span>Music: volume</span></li>
+    </ul>
+  </section>
+
+  <section class="settings-card">
+    <h2>Clear data</h2>
+    <p class="muted">Wipes favorites, recent plays, cloak choice, panic URL, theme, saved volume, and saved last-played track. Does not touch your games or music files.</p>
+    <button id="clearBtn" class="danger">Clear all Study Hub data</button>
+    <p id="clearStatus" class="muted" style="min-height:1em;margin-top:6px"></p>
+  </section>
+</main>
+
+<footer>
+  <span class="muted">Everything local. No sign-in.</span>
+</footer>
+
+<script src="main.js"></script>
+<script src="settings.js"></script>
+</body>
+</html>

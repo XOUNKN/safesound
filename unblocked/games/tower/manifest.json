@@ -1,0 +1,1 @@
+{ "name": "Tower Platformer", "slug": "tower", "repo_url": "https://github.com/jakesgordon/javascript-tower-platformer", "license": "MIT", "entry_file": "index.html", "controls": "Left/Right move, Space jump", "category": "platformer" }

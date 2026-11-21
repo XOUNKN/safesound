@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="serika_dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>codemonkey — a typing test for code</title>
+  <meta name="description" content="Monkeytype, but for code. A minimalist typing speed test where you type real code snippets and measure your WPM and accuracy." />
+
+  <!-- social / link previews (Open Graph + Twitter) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="codemonkey" />
+  <meta property="og:title" content="codemonkey — a typing test for code" />
+  <meta property="og:description" content="Monkeytype, but for code. Race through real code snippets and track your WPM and accuracy." />
+  <meta property="og:url" content="https://fizzexual.github.io/Codemonkey/" />
+  <meta property="og:image" content="https://fizzexual.github.io/Codemonkey/og-image.svg" />
+  <meta property="og:image:type" content="image/svg+xml" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="codemonkey — a typing test for code" />
+  <meta name="twitter:description" content="Monkeytype, but for code. Race through real code snippets and track your WPM and accuracy." />
+  <meta name="twitter:image" content="https://fizzexual.github.io/Codemonkey/og-image.svg" />
+  <meta name="theme-color" content="#e2b714" />
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='11' cy='28' r='9' fill='%23e2b714'/><circle cx='53' cy='28' r='9' fill='%23e2b714'/><circle cx='9' cy='27' r='3.4' fill='%23323437'/><circle cx='55' cy='27' r='3.4' fill='%23323437'/><circle cx='32' cy='33' r='18' fill='%23e2b714'/><circle cx='25' cy='30' r='2.7' fill='%23323437'/><circle cx='39' cy='30' r='2.7' fill='%23323437'/><circle cx='29.5' cy='39' r='1.5' fill='%23323437'/><circle cx='34.5' cy='39' r='1.5' fill='%23323437'/><path d='M27 43.5 Q32 47.5 37 43.5' fill='none' stroke='%23323437' stroke-width='2' stroke-linecap='round'/></svg>" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- ───────────────────────── header ───────────────────────── -->
+    <header class="top-bar">
+      <a class="logo" href="." aria-label="codemonkey home">
+        <svg class="logo-mark" viewBox="0 0 64 64" width="34" height="34" aria-hidden="true">
+          <circle class="m-ear" cx="11" cy="28" r="9"/>
+          <circle class="m-ear" cx="53" cy="28" r="9"/>
+          <circle class="m-inner" cx="9" cy="27" r="3.4"/>
+          <circle class="m-inner" cx="55" cy="27" r="3.4"/>
+          <circle class="m-face" cx="32" cy="33" r="18"/>
+          <ellipse class="m-shade" cx="32" cy="39" rx="12.5" ry="9"/>
+          <circle class="m-feat" cx="25" cy="30" r="2.7"/>
+          <circle class="m-feat" cx="39" cy="30" r="2.7"/>
+          <circle class="m-feat" cx="29.5" cy="39" r="1.5"/>
+          <circle class="m-feat" cx="34.5" cy="39" r="1.5"/>
+          <path class="m-mouth" d="M27 43.5 Q32 47.5 37 43.5"/>
+        </svg>
+        <span class="logo-text"><span class="logo-accent">code</span>monkey</span>
+      </a>
+      <nav class="top-nav">
+        <button id="history-toggle" class="icon-btn" title="your history" aria-label="your history">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="8"/><rect x="12" y="6" width="3" height="12"/><rect x="17" y="13" width="3" height="5"/></svg>
+        </button>
+      </nav>
+    </header>
+
+    <!-- ───────────────────────── config bar ───────────────────────── -->
+    <section class="config-bar" id="config-bar" aria-label="test settings">
+      <div class="config-group" id="mode-group" role="group" aria-label="mode">
+        <button class="config-btn" data-mode="time">⏱ time</button>
+        <button class="config-btn" data-mode="snippet">{ } snippet</button>
+      </div>
+      <span class="config-sep"></span>
+      <div class="config-group" id="value-group" role="group" aria-label="length"></div>
+      <span class="config-sep"></span>
+      <div class="config-group" id="lang-group" role="group" aria-label="language"></div>
+      <span class="config-sep config-sep-flex"></span>
+      <div class="config-group" id="theme-group">
+        <label class="theme-label" for="theme-select">theme</label>
+        <select id="theme-select" class="theme-select" aria-label="theme"></select>
+      </div>
+    </section>
+
+    <!-- ───────────────────────── test panel ───────────────────────── -->
+    <main class="stage">
+      <section class="test-panel" id="test-panel">
+        <div class="live-bar">
+          <span class="live-progress" id="live-progress">60</span>
+          <span class="live-stat" id="live-wpm">0 wpm</span>
+          <span class="live-stat" id="live-acc">100%</span>
+          <span class="live-lang" id="live-lang">javascript</span>
+        </div>
+
+        <div class="code-wrap">
+          <div id="code-display" class="code-display" tabindex="0" aria-label="typing area">
+            <div id="caret" class="caret"></div>
+          </div>
+        </div>
+
+        <div class="test-controls">
+          <button id="restart-btn" class="restart-btn" title="restart test (Tab)">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          </button>
+          <p class="hint">
+            <span class="key">tab</span> restart ·
+            <span class="key">esc</span> reset ·
+            <span class="key">enter</span> new line (auto-indented)
+          </p>
+        </div>
+      </section>
+
+      <!-- ───────────────────────── results ───────────────────────── -->
+      <section class="results" id="results" hidden aria-label="results">
+        <div class="results-top">
+          <div class="results-headline">
+            <div class="big-stat">
+              <div class="big-label">wpm</div>
+              <div class="big-value" id="r-wpm">0</div>
+            </div>
+            <div class="big-stat">
+              <div class="big-label">acc</div>
+              <div class="big-value" id="r-acc">0%</div>
+            </div>
+            <div class="pb-flag" id="pb-flag" hidden>new pb! 🎉</div>
+          </div>
+          <div class="graph-wrap">
+            <canvas id="wpm-graph"></canvas>
+          </div>
+        </div>
+
+        <div class="results-grid">
+          <div class="mini-stat"><div class="mini-label">raw</div><div class="mini-value" id="r-raw">0</div></div>
+          <div class="mini-stat"><div class="mini-label">characters</div><div class="mini-value" id="r-chars">0/0</div></div>
+          <div class="mini-stat"><div class="mini-label">consistency</div><div class="mini-value" id="r-consistency">0%</div></div>
+          <div class="mini-stat"><div class="mini-label">time</div><div class="mini-value" id="r-time">0s</div></div>
+          <div class="mini-stat"><div class="mini-label">test</div><div class="mini-value" id="r-test">—</div></div>
+          <div class="mini-stat"><div class="mini-label">your best</div><div class="mini-value" id="r-pb">—</div></div>
+        </div>
+
+        <div class="results-actions">
+          <button id="next-btn" class="action-btn primary" title="next test (Enter)">next test</button>
+          <button id="repeat-btn" class="action-btn" title="repeat same snippet">repeat</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- ───────────────────────── history drawer ───────────────────────── -->
+    <aside class="history-drawer" id="history-drawer" hidden aria-label="test history">
+      <div class="history-head">
+        <h2>your recent tests</h2>
+        <div class="history-head-actions">
+          <button id="clear-history" class="text-btn">clear</button>
+          <button id="close-history" class="icon-btn" aria-label="close history">✕</button>
+        </div>
+      </div>
+      <div class="history-body" id="history-body"></div>
+    </aside>
+
+    <!-- footer -->
+    <footer class="bottom-bar">
+      <span class="footer-note footer-tip">a monkeytype-inspired typing test for developers</span>
+    </footer>
+  </div>
+
+  <script src="js/themes.js"></script>
+  <script src="js/snippets.js"></script>
+  <script src="js/snippets/javascript.js"></script>
+  <script src="js/snippets/python.js"></script>
+  <script src="js/snippets/typescript.js"></script>
+  <script src="js/snippets/java.js"></script>
+  <script src="js/snippets/cpp.js"></script>
+  <script src="js/snippets/go.js"></script>
+  <script src="js/snippets/rust.js"></script>
+  <script src="js/snippets/sql.js"></script>
+  <script src="js/snippets/bash.js"></script>
+  <script src="js/snippets/quotes.js"></script>
+  <script src="js/snippets/sprout.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

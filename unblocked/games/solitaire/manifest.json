@@ -1,0 +1,1 @@
+{ "name": "Solitaire", "slug": "solitaire", "repo_url": "https://github.com/0xe1f/solitaire", "license": "Apache-2.0", "entry_file": "index.html", "controls": "Drag cards with mouse/touch", "category": "cards" }
